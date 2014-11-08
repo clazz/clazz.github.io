@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ajax Tool</title>
+    <style type="text/css">
+        body{
+            background-color: #d3d3d3;
+        }
+        .output{
+            border-top: gray solid 1px;
+            overflow: auto;
+            max-width: 95vw;
+            max-height: 80vh;
+        }
+        .raw{
+            word-wrap: break-word;
+        }
+        h{
+            font-weight: bold;
+            font-size: 120%;
+        }
+        .json{
+            white-space: pre;
+        }
+    </style>
+</head>
+<body>
+    <select id="method" >
+        <option value="GET">GET</option>
+        <option value="POST">POST</option>
+    </select>
+    <input type="text" id="url" placeholder="please input url.." style="width: 80em"
+           onchange="javascript:split_url()" />
+    <br/>
+    <label>With parameters:</label><br/>
+    <textarea id="param" cols="80" rows="15"></textarea> <br/>
+    <input type="button" value="SEND" onclick="javascript:send_request();" />
+    <input type="button" value="Split URL" onclick="javascript:split_url();" />
+    <input type="button" value="Decode PARAM" onclick="javascript:decode_param();" />
+    <input type="button" value="Encode PARAM" onclick="javascript:encode_param();" />
+    <br/>
+    <h2>Ouput:</h2>
+    <div id="output" class="">
+        <h>Pretty JSON:</h>
+        <div id="json-output" class="json output"></div>
+        <h>After base64 decode:</h>
+        <div id="base64-output" class="base64 output"></div>
+        <h>Raw:</h>
+        <div id="raw-output" class="raw output"></div>
+    </div>
+    <hr/>
+    <h2>History:</h2>
+    <div id="log">
+
+    </div>
+    <script type="text/javascript" src="js/jquery.js" ></script>
+    <script type="text/javascript" src="js/json-formater.js"></script>
+    <script type="text/javascript" src="js/base64.js"></script>
+    <script type="text/javascript">
+        function split_url(){
+            var url = $("#url").val();
+            var a = url.split("?");
+            if (a.length>1){
+                $("#url").val(a[0]);
+                $("#param").val(a[1]);
+            }
+        }
+        function decode_param(){
+            var param = $("#param").val().trim();
+            if (param){
+                var base64 = Base64.decode(param);
+                base64 = base64 || param;
+                var output = formatJson(base64);
+                output = output || base64;
+                $("#param").val(output);
+            }
+        }
+        function encode_param(){
+            var param = $("#param").val().trim();
+            if (param){
+                var jsonParam = parseJson(param);
+                console.log("Param json object: %o", jsonParam);
+                if (!!jsonParam){
+                    var base64 = Base64.encode(JSON.stringify(jsonParam));
+                } else {
+                    var base64 = Base64.encode(param);
+                }
+                $("#param").val(base64);
+            }
+        }
+        function parseJson(code, throws){
+            try{
+                code = ' function json_eval_function(){ return ' + code + ';}';
+                eval(code);
+                return json_eval_function();
+            }catch(e){
+                console.log(" Parse json failed: %o", e);
+                if (throws){
+                    throw e;
+                }
+                return null;
+            }
+        }
+        function send_request(){
+            var ajaxOptions = {
+                type: $("#method").val(),
+                complete: function(){
+                    console.log("complete: %o", arguments);
+                }
+            };
+            var url = $("#url").val();
+            var param = $("#param").val().trim();
+            if (param){
+                var jsonParam = parseJson(param);
+                console.log("Param json object: %o", jsonParam);
+                if (!!jsonParam){
+                    param = Base64.encode(JSON.stringify(jsonParam));
+                } else {
+                    param = param;
+                }
+                if ($("#method").val() == 'GET'){
+                    url = url + "?" + param;
+                    param = {};
+                }else{
+                    url = url;
+                    ajaxOptions.data = param;
+                    ajaxOptions.dataType = 'text';
+                }
+                ajaxOptions.url = url;
+            }
+            console.log(" URL: " + url);
+            console.log(" Ajax params: %o", ajaxOptions);
+            clear_output();
+            $.ajax(ajaxOptions).done(function(data){
+                on_got_output(data);
+                location.hash='#output';
+            }).fail(function(jqXHR, error, msg){
+                if (jqXHR && jqXHR.responseText){  // 有的时候根据返回的application/type解析会出错，但是实际上已经返回值了的。
+                    on_got_output(jqXHR.responseText);
+                    location.hash='#output';
+                    return;
+                }
+                console.log(" Ajax failed: %o, %o (%o)", msg, this, arguments);
+                $("#raw-output").text(" Ajax failed: " + msg);
+            });
+        }
+        function clear_output(){
+            $("#raw-output, #base64-output, #json-output").empty();
+        }
+
+        function on_got_output(output){
+            console.log("Raw output:: %o", output);
+            $("#raw-output").text(output);
+            try{
+                var base64 = Base64.decode(output);
+                console.log("Base64 decoded: %o", base64);
+                $("#base64-output").text(base64);
+                try{
+                    var json = parseJson(base64);
+                    console.log("JSON: %o", json);
+                    var jsonPretty = formatJson(base64);
+                    $("#json-output").text(jsonPretty);
+                }catch(e){
+                    console.log("Failed to decode json: %o", e);
+                    console.log(e.stack);
+                    $("#json-output").text("Invalid JSON!");
+                }
+            }catch(e){
+                console.log("Failed to decode base64: %o", e);
+                console.log(e.stack);
+                $("#base64-output").text("Invalid base64!");
+            }
+            log_it();
+        }
+
+        function log_it(){
+            var output = $("#output").clone().removeAttr("id");
+            $("*", output).removeAttr("id");
+            output.prependTo("#log");
+            $('<h2></h2>').text("Output").prependTo("#log");
+            $('<div></div>').text($("#param").val()).css("white-space", 'pre').prependTo("#log");
+            $('<div></div>').text($("#url").val()).prepend($("#method").val()+" ").prependTo("#log");
+            $('<h2></h2>').text("Input").prependTo("#log");
+            $("<i></i>").text("Time: "+new Date()).prependTo('#log');
+            $("<hr/>").prependTo("#log");
+            $("<hr/>").prependTo("#log");
+        }
+    </script>
+</body>
+</html>
