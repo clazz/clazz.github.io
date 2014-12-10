@@ -89,13 +89,15 @@
 
 <div>
     <input type="text" id="goto_url" name="goto_url" style="width: 100%"
-           value="http://bb.me/bb/public/cps/cpsshowreport" onchange="on_goto_url_change()" />
+           value="" onchange="on_goto_url_change()" />
     <select id="goto_url_select" name="goto_url_select" onchange="javascirpt:on_goto_url_selection_change()">
         <option value="http://bb.me/bb/public/cps/cpsshowreport">http://bb.me/bb/public/cps/cpsshowreport</option>
         <option value="http://hg.me/hg/cps/cpsshowreport">http://hg.me/hg/cps/cpsshowreport</option>
     </select>
     <input type="button" value="GOTO URL(GET, Using base64 as GET param)" onclick="goto_url_get()"/>
     <input type="button" value="DO GET & PARSE" onclick="do_get_and_parse()" />
+    <input type="button" value="GOTO URL(POST, Using base64 as POST param)" onclick="goto_url_post()"/>
+    <input type="button" value="DO POST & PARSE" onclick="do_post_and_parse()" />
 </div>
 <div id="log"></div>
 
@@ -107,7 +109,8 @@
         'http://buckbeek.sit.tuniu.org/bb/public/cps/cpsshowreport',
         'http://buckbeek.sit.tuniu.org/bb/cps/cpsproduct',
         'http://bb.me/bb/public/cps/cpsshowreportexcel',
-        'http://hg.me/hg/cps/cpsshowreportexcel'
+        'http://hg.me/hg/cps/cpsshowreportexcel',
+        '<NULL>',
     ];
     for (var i in urls){
         add_option_to_goto_url_select(urls[i]);
@@ -128,6 +131,7 @@ function add_option_to_goto_url_select(option_url) {
     goto_url_select.add(new_opt);
 }
 function on_goto_url_change(){
+    return;
     var url = $(goto_url).val();
     for (var opt_index in goto_url_select.options) {
         var opt = goto_url_select.options[opt_index];
@@ -175,6 +179,26 @@ function do_get_and_parse(){
     xhttp.open("GET", $(goto_url).val() + "?" + window.last_base64_result, true);
     xhttp.send();
 }
+
+function do_post_and_parse(){
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function(){
+        if (xhttp.readyState == 4 && xhttp.status == 200){
+            var input = xhttp.responseText;
+            input = last_line(input);
+            var result = Base64.decode(input);
+            result = formatJson(result);
+            var original_base64 = window.last_base64_result;
+            output({ 'convertion': "BASE64 DECODE TO JSON",
+                'json': result,
+                'base64':input});
+            window.last_base64_result = original_base64;
+        }
+        $(log).prepend("<p>XHTTP: readyState: " + xhttp.readyState + " status: " + xhttp.status + " URL: " + $(goto_url).val() + "?" + window.last_base64_result + "</p>");
+    };
+    xhttp.open("POST", $(goto_url).val() + "?" + window.last_base64_result, true);
+    xhttp.send();
+}
 function do_copy_output() {
     copyToClipboard( $(output_value).val());
 }
@@ -185,6 +209,14 @@ function do_swap() {
 }
 function goto_url_get() {
     window.open($(goto_url).val() + "?" + window.last_base64_result, "_blank");
+}
+function goto_url_get() {
+    var url = $(goto_url).val();
+    var param = window.last_base64_result;
+    $('<form method="POST" target="_blank"></form>')
+            .attr('action', url)
+            .append($('<input type="hidden" />').attr(name, param))
+            .appendTo('body').submit();
 }
 function on_input_value_change() {
 //    if ($(input_value).val()[0] != '{') {
@@ -237,10 +269,12 @@ function output(convertion, json, base64) {
     $(log).prepend(json_pre_wrapper);
     $(log).prepend(json_title);
     SyntaxHighlighter.highlight({}, json_pre);
-    var goto_url_a = document.createElement("a");
-    goto_url_a.innerText = goto_url_a.href = $(goto_url).val() + "?" + base64;
-    goto_url_a.target = "_blank";
-    $(log).prepend(goto_url_a);
+    if ($(goto_url).val() && $(goto_url).val() != '<NULL>'){
+        var goto_url_a = document.createElement("a");
+        goto_url_a.innerText = goto_url_a.href = $(goto_url).val() + "?" + base64;
+        goto_url_a.target = "_blank";
+        $(log).prepend(goto_url_a);
+    }
     var convertion_p = document.createElement('h3');
     convertion_p.innerText = convertion + '  - '+ (new Date()).toLocaleString();
     $(log).prepend(convertion_p);
