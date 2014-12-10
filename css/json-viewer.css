@@ -1,0 +1,42 @@
+        dl.json-viewer{
+            vertical-align: top;
+            font-size: 14px;
+            line-height: 18px;
+        }
+        dl.json-viewer > dt {
+            font-size: smaller;
+            cursor: pointer;
+        }
+        dl.json-viewer > dt.array{
+            color: darkgoldenrod;
+        }
+        dl.json-viewer > dt.object{
+            color: darkcyan;
+        }
+        dl.json-viewer dd > var, dl.json-viewer dd > i{
+            font-style: normal;
+        }
+        dl.json-viewer dd > var{
+            color: royalblue;
+        }
+        dl.json-viewer dd > var.array{
+            color: steelblue;
+        }
+        dl.json-viewer dd > i{
+            margin-right: 8px;
+            color: darkgreen;
+        }
+        dl.json-viewer dd > samp > dl{
+            display: inline-block;
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+        dl.json-viewer dd > samp > div{
+            display: inline-block;
+        }
+        dl.json-viewer dd > samp > dl > dd{
+            margin-left: 1px;
+        }
+        dl.json-viewer dd > samp.string{
+            color: blue;
+        }
