@@ -1,694 +1,483 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Base64&JSON解析</title>
-    <script type='text/javascript' src='js/jquery.js'></script>
-    <script type='text/javascript' src='js/jquery.autocomplete.js'></script>
-    <script type="text/javascript" src="scripts/shCore.js"></script>
-    <script type="text/javascript" src="scripts/shBrushJScript.js"></script>
-    <link type="text/css" rel="stylesheet" href="styles/shCoreDefault.css">
-    <script type="text/javascript" src="js/json-viewer.js"></script>
-    <link type="text/css" rel="stylesheet" href="css/json-viewer.css">
-    <script type="text/javascript">SyntaxHighlighter.all();</script>
-
+    <title>Ajax Tool</title>
     <style type="text/css">
-        table {
-            width: 100%;
+        body{
+            background-color: #d3d3d3;
         }
-
-        tr {
-            width: 100%;
-        }
-
-        td {
-            width: 50%;
-        }
-
-        textarea {
-            width: 100%;
-            min-height: 200px;
-        }
-
-        div #err {
-            z-index: 0;
-            color: red;
-            background-color: lightyellow;
-        }
-        select {
-            width: 100%;
-        }
-        div .wrapper{
-            min-width: 50vw;
-            max-width: 100vw;
+        .output{
+            border-top: gray solid 1px;
+            overflow: auto;
+            max-width: 95vw;
             max-height: 80vh;
-            overflow-y: auto;
-            padding: 0;
-            border: 0;
-            margin: 0;
         }
-
-        div .syntaxhighlighter {
-            overflow: visible !important;
+        .raw{
+            word-wrap: break-word;
+        }
+        h{
+            font-weight: bold;
+            font-size: 120%;
+        }
+        .json{
+            white-space: pre;
+        }
+        textarea{
+            width: 80vw;
+        }
+        .log-item{
+            margin: 0.5em;
+            padding: 0.5em;
+            border: whitesmoke 1px solid;
+        }
+        #log-item-template{
+            display: none;
+        }
+        .log-item .delBtn{
+            margin-left: 4em;
         }
     </style>
-
 </head>
 <body>
-<div id="ta">
-    <h3>Base64解密-JSON解析</h3>
-
-    <div>
-        <input type="button" value="Base64解密 & ShowJSON" id="test1" onclick="format();"/>
-        <input type="button" value="Base64解密" id="test2" onclick="decode64()"/>
-        <input type="button" value="Base64加密" id="test2" onclick="encode64()"/>
-        <input type="hidden" value="测试" id="22" onclick="decode()"/>
-        <input type="button" value="Copy OUTPUT" onclick="do_copy_output()"/>
-        <input type="button" value="Swap INPUT <-> OUTPUT" onclick="do_swap()"/>
-    </div>
-    <div id="err"></div>
-</div>
-<table>
-    <thead>
-    <tr>
-        <td>Input</td>
-        <td>Output</td>
-    </tr>
-    </thead>
-    <tr>
-        <td>
-            <textarea id="input_value" onchange="javascript:on_input_value_change();"
-                      placeholder="input base64 or url"></textarea>
-        </td>
-        <td>
-            <textarea id="output_value" readonly="readonly" placeholder="output base64 or url"></textarea>
-        </td>
-    </tr>
-</table>
-
-<div>
-    <input type="text" id="goto_url" name="goto_url" style="width: 100%"
-           value="" onchange="on_goto_url_change()" />
-    <select id="goto_url_select" name="goto_url_select" onchange="javascirpt:on_goto_url_selection_change()">
-        <option value="http://bb.me/bb/public/cps/cpsshowreport">http://bb.me/bb/public/cps/cpsshowreport</option>
-        <option value="http://hg.me/hg/cps/cpsshowreport">http://hg.me/hg/cps/cpsshowreport</option>
+    <select id="method" >
+        <option value="GET">GET</option>
+        <option value="POST">POST</option>
     </select>
-    <input type="button" value="GOTO URL(GET, Using base64 as GET param)" onclick="goto_url_get()"/>
-    <input type="button" value="DO GET & PARSE" onclick="do_get_and_parse()" />
-    <input type="button" value="GOTO URL(POST, Using base64 as POST param)" onclick="goto_url_post()"/>
-    <input type="button" value="DO POST & PARSE" onclick="do_post_and_parse()" />
-</div>
-<div id="log"></div>
+    <input type="text" id="url" placeholder="please input url.." style="width: 80em"
+           onchange="javascript:split_url()" />
+    <br/>
+    <label>With parameters:</label><br/>
+    <textarea id="param"  rows="15" onchange="auto_expand(this);"></textarea> <br/>
+    <input type="button" value="SEND" onclick="javascript:send_request();" />
+    <input type="button" value="Split URL" onclick="javascript:split_url();" />
+    <input type="button" value="Decode PARAM" onclick="javascript:decode_param();" />
+    <input type="button" value="Encode PARAM" onclick="javascript:encode_param();" />
+    <input type="button" value="Undo" onclick="javascript:undo_it();" title="Are your regretting? Click here to undo it." />
+    <input type="button" value="Redo" onclick="javascript:redo_it();" title="Are your regretting of having undone something? Click here to redo it." />
+    <br/>
+    <h2>Ouput:</h2>
+    <div id="output" class="">
+        <h>Pretty JSON:</h>
+        <div id="json-output" class="json output"></div>
+        <h>After base64 decode:</h>
+        <div id="base64-output" class="base64 output"></div>
+        <h>Raw:</h>
+        <div id="raw-output" class="raw output"></div>
+    </div>
+    <hr/>
+    <h2>History:</h2>
+    <div id="log">
 
-<script type="text/javascript">
-(function () {
-    window.onresize = adjust_input_size;
-    adjust_input_size();
-    var urls = [
-        'http://buckbeek.sit.tuniu.org/bb/public/cps/cpsshowreport',
-        'http://buckbeek.sit.tuniu.org/bb/cps/cpsproduct',
-        'http://bb.me/bb/public/cps/cpsshowreportexcel',
-        'http://hg.me/hg/cps/cpsshowreportexcel',
-        '<NULL>',
-    ];
-    for (var i in urls){
-        add_option_to_goto_url_select(urls[i]);
-    }
-    if (localStorage.urls + "" != "undefined") {
-		urls = localStorage.urls.split("\n");
-		for (var i in urls){
-			add_option_to_goto_url_select(urls[i]);
-		}
-    }
-    $(goto_url).val($(goto_url_select).val());
-})();
-function add_option_to_goto_url_select(option_url) {
-    var new_opt = document.createElement('option');
-    new_opt.value = option_url;
-    new_opt.innerText = option_url;
-    new_opt.selected = true;
-    goto_url_select.add(new_opt);
-}
-function on_goto_url_change(){
-    return;
-    var url = $(goto_url).val();
-    for (var opt_index in goto_url_select.options) {
-        var opt = goto_url_select.options[opt_index];
-        if (opt.value == url){
-            return;
+    </div>
+    <script type="text/javascript" src="js/jquery.js" ></script>
+    <script type="text/javascript" src="js/external/jquery.indexeddb.js" ></script>
+    <script type="text/javascript" src="js/json-viewer.js"></script>
+    <script type="text/javascript" src="js/json-formater.js"></script>
+    <script type="text/javascript" src="js/base64.js"></script>
+    <script type="text/javascript">
+
+
+        function EncodeDecodeHistory(){
+            var self = this;
+            self.data = { name: 'EncodeDecodeHistory', history: [] };
+
+            self.save = function(){
+                var data = JSON.stringify(self.data);
+            };
+            return this;
         }
-    }
-    localStorage.urls = localStorage.urls + "\n" + url;
-    add_option_to_goto_url_select(url);
-}
-function on_goto_url_selection_change(){
-    $(goto_url).val($(goto_url_select).val());
-}
-function copyToClipboard(text) {
-    if (window.clipboardData) // IE
-    {
-        window.clipboardData.setData("Text", text);
-    }
-    else {
-        unsafeWindow.netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");
-        const clipboardHelper = Components.classes[ "@mozilla.org/widget/clipboardhelper;1"].getService(Components.interfaces.nsIClipboardHelper);
-        clipboardHelper.copyString(text);
-    }
-}
-function last_line(text){
-    var lines = text.split("\n");
-    return lines[lines.length - 1];
-}
-function do_get_and_parse(){
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function(){
-        if (xhttp.readyState == 4 && xhttp.status == 200){
-            var input = xhttp.responseText;
-            input = last_line(input);
-            var result = Base64.decode(input);
-            result = formatJson(result);
-            var original_base64 = window.last_base64_result;
-            output({ 'convertion': "BASE64 DECODE TO JSON",
-                'json': result,
-                'base64':input});
-            window.last_base64_result = original_base64;
-        }
-        $(log).prepend("<p>XHTTP: readyState: " + xhttp.readyState + " status: " + xhttp.status + " URL: " + $(goto_url).val() + "?" + window.last_base64_result + "</p>");
-    };
-    xhttp.open("GET", $(goto_url).val() + "?" + window.last_base64_result, true);
-    xhttp.send();
-}
 
-function do_post_and_parse(){
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function(){
-        if (xhttp.readyState == 4 && xhttp.status == 200){
-            var input = xhttp.responseText;
-            input = last_line(input);
-            var result = Base64.decode(input);
-            result = formatJson(result);
-            var original_base64 = window.last_base64_result;
-            output({ 'convertion': "BASE64 DECODE TO JSON",
-                'json': result,
-                'base64':input});
-            window.last_base64_result = original_base64;
-        }
-        $(log).prepend("<p>XHTTP: readyState: " + xhttp.readyState + " status: " + xhttp.status + " URL: " + $(goto_url).val() + "?" + window.last_base64_result + "</p>");
-    };
-    xhttp.open("POST", $(goto_url).val() + "?" + window.last_base64_result, true);
-    xhttp.send();
-}
-function do_copy_output() {
-    copyToClipboard( $(output_value).val());
-}
-function do_swap() {
-    var t = $(input_value).val();
-    $(input_value).val($(output_value).val());
-    $(output_value).val(t);
-}
-function goto_url_get() {
-    window.open($(goto_url).val() + "?" + window.last_base64_result, "_blank");
-}
-function goto_url_get() {
-    var url = $(goto_url).val();
-    var param = window.last_base64_result;
-    $('<form method="POST" target="_blank"></form>')
-            .attr('action', url)
-            .append($('<input type="hidden" />').attr(name, param))
-            .appendTo('body').submit();
-}
-function on_input_value_change() {
-//    if ($(input_value).val()[0] != '{') {
-//        format();
-//    } else {
-//        encode64();
-//    }
-}
-function adjust_input_size() {
-    //$(input_value).height($(window).height()  - $(ta).height() - 50);
-}
-function report_error(msg) {
-    $(err).text(msg);
-    $(err).show();
-    if (msg != "") {
-        setTimeout(function () {
-            $(err).fadeOut()
-        }, 2000);
-    }
-}
-function output(convertion, json, base64) {
-    if (!json && !base64) {
-        json = convertion['json'];
-        base64 = convertion['base64'];
-        convertion = convertion['convertion'];
-    }
-    window.last_base64_result = base64;
-    var base64_p = document.createElement('p');
-    base64_p.innerText = "BASE64: " + base64;
-    $(log).prepend(base64_p);
-    var json_title = document.createElement('p');
-    json_title.innerText = "JSON:";
-    var json_pre = document.createElement('pre');
-    json_pre.className = "brush: js;";
-    json_pre.innerHTML = json;
-
-
-    var json_pre_wrapper = document.createElement("div");
-    json_pre_wrapper.className = "wrapper";
-    json_pre_wrapper.appendChild(json_pre);
-    var obj = parseJson(json);
-    var viewer = new JsonViewer({
-        renderTo: $('<div></div>').insertBefore(json_pre),
-        json: obj
-    });
-    window.viewer = viewer;
-    json_pre_wrapper.onscroll = function(){
-      json_pre_wrapper.scroll();
-    };
-    $(log).prepend(json_pre_wrapper);
-    $(log).prepend(json_title);
-    SyntaxHighlighter.highlight({}, json_pre);
-    if ($(goto_url).val() && $(goto_url).val() != '<NULL>'){
-        var goto_url_a = document.createElement("a");
-        goto_url_a.innerText = goto_url_a.href = $(goto_url).val() + "?" + base64;
-        goto_url_a.target = "_blank";
-        $(log).prepend(goto_url_a);
-    }
-    var convertion_p = document.createElement('h3');
-    convertion_p.innerText = convertion + '  - '+ (new Date()).toLocaleString();
-    $(log).prepend(convertion_p);
-    $(log).prepend(document.createElement("hr"));
-    if (convertion == "BASE64 ENCODE") {
-        $(output_value).val(base64);
-    } else {
-        $(output_value).val(json);
-    }
-    //window.location.replace(window.location.origin + window.location.pathname + "#log");}
-    window.location.replace("#log");
-}
-
-function parseJson(code, throws){
-    try{
-        code = ' function json_eval_function(){ return ' + code + ';}';
-        eval(code);
-        return json_eval_function();
-    }catch(e){
-        console.log(" Parse json failed: %o", e);
-        if (throws){
-            throw e;
-        }
-        return null;
-    }
-}
-
-function decode64() {
-    var result = Base64.decode($('#input_value').val());
-    output({ 'convertion': "BASE64 DECODE",
-        'json': result,
-        'base64': $('#input_value').val() });
-}
-function encode64() {
-    var result = Base64.encode($('#input_value').val());
-    formatJson($('#input_value').val());
-    output({ 'convertion': "BASE64 ENCODE",
-        'json': $('#input_value').val(),
-        'base64': result });
-
-}
-function format() {
-    var rawInput = $('#input_value').val();
-    var input = (rawInput.indexOf('?') > 0) ? rawInput.substring(rawInput.indexOf('?') + 1) : rawInput;
-    var result = Base64.decode(input);
-    result = formatJson(result);
-    output({ 'convertion': "BASE64 DECODE TO JSON",
-        'json': result,
-        'base64': $('#input_value').val()});
-}
-
-function repeat(s, count) {
-    return new Array(count + 1).join(s);
-}
-function formatJson(json) {
-    var i = 0,
-            il = 0,
-            tab = "	",
-            newJson = "",
-            indentLevel = 0,
-            inString = false,
-            currentChar = null;
-    try {
-        for (i = 0, il = json.length; i < il; i += 1) {
-            currentChar = json.charAt(i);
-            switch (currentChar) {
-                case '{':
-                case '[':
-                    if (!inString) {
-                        newJson += currentChar + "\n" + repeat(tab, indentLevel + 1);
-                        indentLevel += 1;
-                    } else {
-                        newJson += currentChar;
-                    }
-                    break;
-                case '}':
-                case ']':
-                    if (!inString) {
-                        indentLevel -= 1;
-                        newJson += "\n" + repeat(tab, indentLevel) + currentChar;
-                    } else {
-                        newJson += currentChar;
-                    }
-                    break;
-                case ',':
-                    if (!inString) {
-                        newJson += ",\n" + repeat(tab, indentLevel);
-                    } else {
-                        newJson += currentChar;
-                    }
-                    break;
-                case ':':
-                    if (!inString) {
-                        newJson += ": ";
-                    } else {
-                        newJson += currentChar;
-                    }
-                    break;
-                case ' ':
-                case "\n":
-                case "\t":
-                    if (inString) {
-                        newJson += currentChar;
-                    }
-                    break;
-                case '"':
-                    if (i > 0 && json.charAt(i - 1) !== '\\') {
-                        inString = !inString;
-                    }
-                    newJson += currentChar;
-                    break;
-                default:
-                    newJson += currentChar;
-                    break;
-            }
-        }
-        return  JSON.stringify(JSON.parse(newJson), null, "   ");
-    } catch (e) {
-        var ret = '';
-        report_error('格式有误: ' + e);
-    }
-
-}
-/* Base64加密解密 */
-var Nibbler = function (options) {
-    var construct,
-
-    // options
-            pad, dataBits, codeBits, keyString, arrayData,
-
-    // private instance variables
-            mask, group, max,
-
-    // private methods
-            gcd, translate,
-
-    // public methods
-            encode, decode,
-
-            utf16to8, utf8to16;
-
-    // pseudo-constructor
-    construct = function () {
-        var i, mag, prev;
-
-        // options
-        pad = options.pad || '';
-        dataBits = options.dataBits;
-        codeBits = options.codeBits;
-        keyString = options.keyString;
-        arrayData = options.arrayData;
-
-        // bitmasks
-        mag = Math.max(dataBits, codeBits);
-        prev = 0;
-        mask = [];
-        for (i = 0; i < mag; i += 1) {
-            mask.push(prev);
-            prev += prev + 1;
-        }
-        max = prev;
-
-        // ouput code characters in multiples of this number
-        group = dataBits / gcd(dataBits, codeBits);
-    };
-
-    // greatest common divisor
-    gcd = function (a, b) {
-        var t;
-        while (b !== 0) {
-            t = b;
-            b = a % b;
-            a = t;
-        }
-        return a;
-    };
-
-    // the re-coder
-    translate = function (input, bitsIn, bitsOut, decoding) {
-        var i, len, chr, byteIn,
-                buffer, size, output,
-                write;
-
-        // append a byte to the output
-        write = function (n) {
-            if (!decoding) {
-                output.push(keyString.charAt(n));
-            } else if (arrayData) {
-                output.push(n);
-            } else {
-                output.push(String.fromCharCode(n));
-            }
-        };
-
-        buffer = 0;
-        size = 0;
-        output = [];
-
-        len = input.length;
-        for (i = 0; i < len; i += 1) {
-            // the new size the buffer will be after adding these bits
-            size += bitsIn;
-
-            // read a character
-            if (decoding) {
-                // decode it
-                chr = input.charAt(i);
-                byteIn = keyString.indexOf(chr);
-                if (chr === pad) {
-                    break;
-                } else if (byteIn < 0) {
-                    throw 'the character "' + chr + '" is not a member of ' + keyString;
+        function UndoManager(){
+            var self = this;
+            self.data = { name: 'UndoManager', history: []};
+            self.add = function(text){
+                self.data.history.push(text);
+                self.data.current = self.data.history.length - 1;
+            };
+            self.undo = function(){
+                if (self.data.current > 0){
+                    self.data.current--;
                 }
-            } else {
-                if (arrayData) {
-                    byteIn = input[i];
+                return self.data.history[self.data.current];
+            }
+            self.redo = function(){
+                if (self.data.current < self.data.history.length - 1){
+                    self.data.current++;
+                }
+                return  self.data.history[self.data.current];
+            }
+            return this;
+        }
+        $(function(){
+            window.undoManager = new UndoManager();
+            window.set_param = function(text){
+                undoManager.add(text);
+                $("#param").val(text);
+            }
+            $("#param").on('change', function(){
+                undoManager.add($(this).val());
+            });
+        });
+
+        function undo_it(){
+            $('#param').val(undoManager.undo());
+        }
+        function redo_it(){
+            $('#param').val(undoManager.redo());
+        }
+
+        function auto_expand(textArea){
+            var value = $(textArea).val();
+            var lines = value.split("\n") || [];
+            if (lines.length > 10){
+                $(textArea).css('height', lines.length * 1.14+'em');
+            }
+        }
+        function split_url(){
+            var url = $("#url").val();
+            var a = url.split("?");
+            if (a.length>1){
+                $("#url").val(a[0]);
+                set_param(a[1]);
+            }
+        }
+        function decode_param(){
+            var param = $("#param").val().trim();
+            if (param){
+                var base64 = Base64.decode(param);
+                base64 = base64 || param;
+                var output = formatJson(base64);
+                output = output || base64;
+                set_param(output);
+            }
+        }
+        function encode_param(){
+            var param = $("#param").val().trim();
+            if (param){
+                var jsonParam = parseJson(param);
+                console.log("Param json object: %o", jsonParam);
+                if (!!jsonParam){
+                    var base64 = Base64.encode(JSON.stringify(jsonParam));
                 } else {
-                    byteIn = input.charCodeAt(i);
+                    var base64 = Base64.encode(param);
                 }
-                if ((byteIn | max) !== max) {
-                    throw byteIn + " is outside the range 0-" + max;
+                set_param(base64);
+            }
+        }
+        function parseJson(code, throws){
+            try{
+                code = ' function json_eval_function(){ return ' + code + ';}';
+                eval(code);
+                return json_eval_function();
+            }catch(e){
+                console.log(" Parse json failed: %o", e);
+                if (throws){
+                    throw e;
+                }
+                return null;
+            }
+        }
+        function send_request(){
+            var ajaxOptions = {
+                type: $("#method").val(),
+                complete: function(){
+                    console.log("complete: %o", arguments);
+                }
+            };
+            var url = $("#url").val();
+            var param = $("#param").val().trim();
+            if (param){
+                var jsonParam = parseJson(param);
+                console.log("Param json object: %o", jsonParam);
+                if (!!jsonParam){
+                    var jsonPretty = JSON.stringify(jsonParam, null, '    ');
+                    param = Base64.encode(JSON.stringify(jsonParam));
+                } else {
+                    param = param;
+                }
+                if ($("#method").val() == 'GET'){
+                    url = url + "?" + param;
+                    param = {};
+                }else{
+                    url = url;
+                    ajaxOptions.data = param;
+                    ajaxOptions.dataType = 'text';
+                }
+                ajaxOptions.url = url;
+            }
+            console.log(" URL: " + url);
+            console.log(" Ajax params: %o", ajaxOptions);
+            clear_output();
+            $.ajax(ajaxOptions).done(function(data){
+                on_got_output(data, { url: url, param: param, type: ajaxOptions.type, jsonPretty: jsonPretty });
+                location.hash='#output';
+            }).fail(function(jqXHR, error, msg){
+                if (jqXHR && jqXHR.responseText){  // 有的时候根据返回的application/type解析会出错，但是实际上已经返回值了的。
+                    on_got_output(jqXHR.responseText, { url: url, param: param, type: ajaxOptions.type, jsonPretty: jsonPretty });
+                    location.hash='#output';
+                    return;
+                }
+                console.log(" Ajax failed: %o, %o (%o)", msg, this, arguments);
+                $("#raw-output").text(" Ajax failed: " + msg);
+            });
+        }
+        function clear_output(){
+            $("#raw-output, #base64-output, #json-output").empty();
+        }
+
+        function on_got_output(output, request){
+            console.log("Raw output:: %o", {output: output});
+            $("#raw-output").text(output);
+            try{
+                var base64 = Base64.decode(output);
+                console.log("Base64 decoded: %o", {base64: base64});
+                $("#base64-output").text(base64);
+                try{
+                    var json = parseJson(base64);
+                    console.log("JSON: %o", {json: json});
+                    var jsonPretty = formatJson(base64);
+                    $("#json-output").text(jsonPretty);
+                }catch(e){
+                    console.log("Failed to decode json: %o", e);
+                    console.log(e.stack);
+                    $("#json-output").text("Invalid JSON!");
+                }
+            }catch(e){
+                console.log("Failed to decode base64: %o", e);
+                console.log(e.stack);
+                $("#base64-output").text("Invalid base64!");
+            }
+            log_it({ base64: base64, json: json, jsonPretty: jsonPretty, raw: output }, request);
+        }
+
+        function render_and_prepend_log(data) {
+            var logItem = $('#log-item-template').clone().removeAttr('id');
+            logItem.find('.request .type').text(data.request.type);
+            logItem.find('.request .url').text(data.request.url);
+            logItem.find('.request .param').text(data.request.param);
+            logItem.find('.request .jsonPretty').text(data.request.jsonPretty);
+            logItem.find('.response .base64').text(data.response.base64);
+            logItem.find('.response .jsonNormal').text(data.response.json);
+            logItem.find('.response .jsonPretty').text(data.response.jsonPretty);
+            logItem.find('.response .raw').text(data.response.raw);
+            logItem.find('.id').text(data.id);
+            logItem.find('.delBtn').on('click', function(){
+                logItemDb.remove(data);
+                logItem.remove();
+            });
+            logItem.prependTo('#log');
+            logItem.find('h3,h4').initExpander(true);
+        }
+        function log_it(response, request){
+            var data = {
+                request: request,
+                response: response
+            };
+
+            logItemDb.add(data);
+            render_and_prepend_log(data);
+        }
+
+        function load_log_items(){
+            logItemDb.each(function(item){
+                render_and_prepend_log(item);
+            });
+        }
+
+        $(function(){
+            load_log_items();
+        });
+
+        function LogItemDb(){
+            var self = this;
+            var db = self.db = new MyDbStore('log');
+            self.id = 0;
+
+            db.find('id').done(function(id){  self.id = (id || 0); });
+
+            self.add = function(item){
+                self.id = self.id || 0;
+                var id = ++self.id;
+                item.id = id;
+                var value = { addTime: new Date(), data: item };
+                db.put('id', self.id);
+                return db.add(id, value);
+            };
+
+            self.remove = function(item){
+                return db.remove(item.id);
+            };
+
+            self.each = function(iterator){
+                return db.each(function(item){
+                    if (item.key != 'id'){
+                        iterator(item.value.data, item.value.addTime);
+                    }
+                });
+            }
+
+            return this;
+        }
+        window.logItemDb = new LogItemDb();
+
+
+        function MyDbStore(dbName, storeName){
+            var self = this;
+            dbName = dbName || '__default__';
+            storeName = storeName || '__default__';
+            var db = self.db = $.indexedDB(dbName, {
+                "schema": {
+                    "1": function (versionTransaction) {
+                        versionTransaction.createObjectStore(storeName);
+                    }
+                }
+            });
+            var isLogEnabled = true;
+
+            function log(){
+                if (isLogEnabled){
+                    console.log.apply(console, arguments);
                 }
             }
 
-            // shift the buffer to the left and add the new bits
-            buffer = (buffer << bitsIn) | byteIn;
-
-            // as long as there's enough in the buffer for another output...
-            while (size >= bitsOut) {
-                // the new size the buffer will be after an output
-                size -= bitsOut;
-
-                // output the part that lies to the left of that number of bits
-                // by shifting the them to the right
-                write(buffer >> size);
-
-                // remove the bits we wrote from the buffer
-                // by applying a mask with the new size
-                buffer &= mask[size];
+            self.enableLog = function(toEnable){
+                isLogEnabled = (toEnable === undefined ? true : toEnable);
             }
+
+            self.add = function(key, value){
+                return db.transaction([storeName]).then(function () {
+                    log("Transaction completed");
+                }, function () {
+                    log("Transaction aborted");
+                }, function (t) {
+                    log("Transaction in progress");
+                    t.objectStore(storeName).add(value, key).then(function () {
+                        log("Data added");
+                    }, function () {
+                        log("Error adding data");
+                    });
+                });
+            };
+
+            self.remove = function(key){
+                return db.transaction([storeName]).then(function () {
+                    log("Transaction completed");
+                }, function () {
+                    log("Transaction aborted");
+                }, function (t) {
+                    log("Transaction in progress");
+                    t.objectStore(storeName).delete(key).then(function () {
+                        log("Data deleted");
+                    }, function () {
+                        log("Error deleting data");
+                    });
+                });
+            };
+
+            self.removeAll = self.clear = function(){
+                return db.transaction([storeName]).then(function () {
+                    log("Transaction completed");
+                }, function () {
+                    log("Transaction aborted");
+                }, function (t) {
+                    log("Transaction in progress");
+                    t.objectStore(storeName).clear().then(function () {
+                        log("Data cleared");
+                    }, function () {
+                        log("Error clearing data");
+                    });
+                });
+            }
+
+            self.set = self.update = function(key, value){
+                self.remove(key);
+                return self.add(key, value);
+            };
+
+            self.find = function(key){
+                return db.transaction([storeName]).then(function () {
+                    log("Transaction completed");
+                }, function () {
+                    log("Transaction aborted");
+                }, function (t) {
+                    log("Transaction in progress");
+                    t.objectStore(storeName).get(key).then(function (value) {
+                        log("Data got %o", arguments);
+                    }, function () {
+                        log("Error getting data");
+                    });
+                });
+            }
+
+            self.each = function(iterator){
+                return db.transaction([storeName]).then(function () {
+                    log("Transaction completed");
+                }, function () {
+                    log("Transaction aborted");
+                }, function (t) {
+                    log("Transaction in progress");
+                    t.objectStore(storeName).each(iterator).then(function () {
+                        log("Data iterated");
+                    }, function () {
+                        log("Error getting data");
+                    });
+                });
+            };
+
+            self.put = function(key, value){
+                return db.transaction([storeName]).then(function () {
+                    log("Transaction completed");
+                }, function () {
+                    log("Transaction aborted");
+                }, function (t) {
+                    log("Transaction in progress");
+                    t.objectStore(storeName).put(value, key).then(function (value) {
+                        log("Data put %o", arguments);
+                    }, function () {
+                        log("Error putting data");
+                    });
+                });
+            }
+
+            // count().done(function(){ console.log(arguments)})
+            // => [100, event]
+            self.count = function(){
+                return db.objectStore(storeName).count();
+            }
+
+            return this;
         }
 
-        // If we're encoding and there's input left over, pad the output.
-        // Otherwise, leave the extra bits off, 'cause they themselves are padding
-        if (!decoding && size > 0) {
+    </script>
+    <div id="log-item-template" class="log-item">
+        <div>LOG ID: <span class="id"></span><input type="button" class="delBtn" value="DELETE" /></div>
+        <h3>Request</h3>
+        <div class="request">
+            <h4>
+                <span class="type" style="margin-right: 2em"></span><span class="url" style="font-weight: normal"></span>
+            </h4>
+            <h4>With PARAM:</h4>
+            <p class="param">
 
-            // flush the buffer
-            write(buffer << (bitsOut - size));
+            </p>
+            <h4>Pretty JSON:</h4>
+            <pre>
+                <code class="jsonPretty json">
 
-            // add padding keyString for the remainder of the group
-            len = output.length % group;
-            for (i = 0; i < len; i += 1) {
-                output.push(pad);
-            }
-        }
-
-        // string!
-        return (arrayData && decoding) ? output : output.join('');
-    };
-
-    /**
-     * Encode.  Input and output are strings.
-     */
-    encode = function (str) {
-        //return translate(input, dataBits, codeBits, false);
-        str = utf16to8(str);
-        var out = "", i = 0, len = str.length, c1, c2, c3, base64EncodeChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-        while (i < len) {
-            c1 = str.charCodeAt(i++) & 0xff;
-            if (i == len) {
-                out += base64EncodeChars.charAt(c1 >> 2);
-                out += base64EncodeChars.charAt((c1 & 0x3) << 4);
-                out += "==";
-                break;
-            }
-            c2 = str.charCodeAt(i++);
-            if (i == len) {
-                out += base64EncodeChars.charAt(c1 >> 2);
-                out += base64EncodeChars.charAt(((c1 & 0x3) << 4)
-                        | ((c2 & 0xF0) >> 4));
-                out += base64EncodeChars.charAt((c2 & 0xF) << 2);
-                out += "=";
-                break;
-            }
-            c3 = str.charCodeAt(i++);
-            out += base64EncodeChars.charAt(c1 >> 2);
-            out += base64EncodeChars.charAt(((c1 & 0x3) << 4)
-                    | ((c2 & 0xF0) >> 4));
-            out += base64EncodeChars.charAt(((c2 & 0xF) << 2)
-                    | ((c3 & 0xC0) >> 6));
-            out += base64EncodeChars.charAt(c3 & 0x3F);
-        }
-        return out;
-    };
-
-    /**
-     * Decode.  Input and output are strings.
-     */
-    decode = function (str) {
-        //return translate(input, codeBits, dataBits, true);
-        var c1, c2, c3, c4;
-        var i, len, out;
-        var base64DecodeChars = new Array(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1, -1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1);
-        len = str.length;
-        i = 0;
-        out = "";
-        while (i < len) {
-            do {
-                c1 = base64DecodeChars[str.charCodeAt(i++) & 0xff];
-            }
-            while (i < len && c1 == -1);
-            if (c1 == -1) break;
-            do {
-                c2 = base64DecodeChars[str.charCodeAt(i++) & 0xff];
-            }
-            while (i < len && c2 == -1);
-            if (c2 == -1) break;
-            out += String.fromCharCode((c1 << 2) | ((c2 & 0x30) >> 4));
-            do {
-                c3 = str.charCodeAt(i++) & 0xff;
-                if (c3 == 61) {
-                    out = utf8to16(out);
-                    return out;
-                }
-                c3 = base64DecodeChars[c3];
-            }
-            while (i < len && c3 == -1);
-            if (c3 == -1) break;
-            out += String.fromCharCode(((c2 & 0XF) << 4) | ((c3 & 0x3C) >> 2));
-            do {
-                c4 = str.charCodeAt(i++) & 0xff;
-                if (c4 == 61) {
-                    out = utf8to16(out);
-                    return out;
-                }
-                c4 = base64DecodeChars[c4];
-            }
-            while (i < len && c4 == -1);
-            if (c4 == -1) break;
-            out += String.fromCharCode(((c3 & 0x03) << 6) | c4);
-        }
-        out = utf8to16(out);
-        return out;
-    };
-
-    utf16to8 = function (str) {
-        var out, i, len, c;
-        out = "";
-        len = str.length;
-        for (i = 0; i < len; i++) {
-            c = str.charCodeAt(i);
-            if ((c >= 0x0001) && (c <= 0x007F)) {
-                out += str.charAt(i);
-            } else if (c > 0x07FF) {
-                out += String
-                        .fromCharCode(0xE0 | ((c >> 12) & 0x0F));
-                out += String
-                        .fromCharCode(0x80 | ((c >> 6) & 0x3F));
-                out += String
-                        .fromCharCode(0x80 | ((c >> 0) & 0x3F));
-            } else {
-                out += String
-                        .fromCharCode(0xC0 | ((c >> 6) & 0x1F));
-                out += String
-                        .fromCharCode(0x80 | ((c >> 0) & 0x3F));
-            }
-        }
-        return out;
-    };
-
-    utf8to16 = function (str) {
-        var out, i, len, c;
-        var char2, char3;
-        out = "";
-        len = str.length;
-        i = 0;
-        while (i < len) {
-            c = str.charCodeAt(i++);
-            switch (c >> 4) {
-                case 0:
-                case 1:
-                case 2:
-                case 3:
-                case 4:
-                case 5:
-                case 6:
-                case 7:
-                    out += str.charAt(i - 1);
-                    break;
-                case 12:
-                case 13:
-                    char2 = str.charCodeAt(i++);
-                    out += String.fromCharCode(((c & 0x1F) << 6) | (char2 & 0x3F));
-                    break;
-                case 14:
-                    char2 = str.charCodeAt(i++);
-                    char3 = str.charCodeAt(i++);
-                    out += String.fromCharCode(((c & 0x0F) << 12) | ((char2 & 0x3F) << 6) | ((char3 & 0x3F) << 0));
-                    break;
-            }
-        }
-        return out;
-    }
-    this.encode = encode;
-    this.decode = decode;
-    construct();
-};
-window.Base64 = new Nibbler({
-    dataBits: 8,
-    codeBits: 6,
-    keyString: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/',
-    pad: '='
-});
-
-</script>
+                </code>
+            </pre>
+        </div>
+        <h3>Response</h3>
+        <div class="response">
+            <h4>Pretty JSON</h4>
+            <pre><code class="jsonPretty json"></code></pre>
+            <h4>JSON</h4>
+            <pre><code class="jsonNormal json"></code></pre>
+            <h4>BASE64</h4>
+            <p class="base64"></p>
+            <h4>RAW</h4>
+            <p class="raw"></p>
+        </div>
+    </div>
 </body>
 </html>

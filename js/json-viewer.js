@@ -92,6 +92,9 @@
             $(triggers.toArray().slice(0,3)).trigger('expand');
         }
     }
+    $.fn.initExpander = function(defaultExpand){
+        return initExpander(this, defaultExpand);
+    }
 
     function JsonViewer(options) {
         var defaultOptions = {

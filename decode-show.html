@@ -5,7 +5,6 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Base64&JSON解析</title>
     <script type='text/javascript' src='js/jquery.js'></script>
-    <script type='text/javascript' src='js/jquery.autocomplete.js'></script>
     <script type="text/javascript" src="scripts/shCore.js"></script>
     <script type="text/javascript" src="scripts/shBrushJScript.js"></script>
     <link type="text/css" rel="stylesheet" href="styles/shCoreDefault.css">
@@ -111,6 +110,7 @@
         'http://bb.me/bb/public/cps/cpsshowreportexcel',
         'http://hg.me/hg/cps/cpsshowreportexcel',
         '<NULL>',
+        'http://bb.pcy.tuniu.org/bb/adcms/test'
     ];
     for (var i in urls){
         add_option_to_goto_url_select(urls[i]);
@@ -162,43 +162,42 @@ function last_line(text){
 }
 function do_get_and_parse(){
     var xhttp = new XMLHttpRequest();
+    var uri = $(goto_url).val() + "?" + get_base64_text();
     xhttp.onreadystatechange = function(){
         if (xhttp.readyState == 4 && xhttp.status == 200){
             var input = xhttp.responseText;
             input = last_line(input);
             var result = Base64.decode(input);
             result = formatJson(result);
-            var original_base64 = window.last_base64_result;
-            output({ 'convertion': "BASE64 DECODE TO JSON",
-                'json': result,
-                'base64':input});
-            window.last_base64_result = original_base64;
+            output({
+                convertion: "BASE64 DECODE TO JSON",
+                json: result,
+                base64:input
+            });
         }
-        $(log).prepend("<p>XHTTP: readyState: " + xhttp.readyState + " status: " + xhttp.status + " URL: " + $(goto_url).val() + "?" + window.last_base64_result + "</p>");
+        $(log).prepend("<p>XHTTP: readyState: " + xhttp.readyState + " status: " + xhttp.status + " URL: " + uri + "</p>");
     };
-    xhttp.open("GET", $(goto_url).val() + "?" + window.last_base64_result, true);
+    xhttp.open("GET", uri, true);
     xhttp.send();
 }
 
-function do_post_and_parse(){
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function(){
-        if (xhttp.readyState == 4 && xhttp.status == 200){
-            var input = xhttp.responseText;
-            input = last_line(input);
-            var result = Base64.decode(input);
-            result = formatJson(result);
-            var original_base64 = window.last_base64_result;
-            output({ 'convertion': "BASE64 DECODE TO JSON",
-                'json': result,
-                'base64':input});
-            window.last_base64_result = original_base64;
+function get_base64_text(){
+    if (window.last_base64_result){
+        return window.last_base64_result;
+    } else {
+        var input = $('#input_value').val() || "";
+        if (is_json_code(input)){
+            return Base64.encode(JSON.stringify(parseJson(input)));
+        } else {
+            return input;
         }
-        $(log).prepend("<p>XHTTP: readyState: " + xhttp.readyState + " status: " + xhttp.status + " URL: " + $(goto_url).val() + "?" + window.last_base64_result + "</p>");
-    };
-    xhttp.open("POST", $(goto_url).val() + "?" + window.last_base64_result, true);
-    xhttp.send();
+    }
 }
+
+function is_json_code(code){
+    return code.trim()[0] == '{'
+}
+
 function do_copy_output() {
     copyToClipboard( $(output_value).val());
 }
@@ -208,17 +207,18 @@ function do_swap() {
     $(output_value).val(t);
 }
 function goto_url_get() {
-    window.open($(goto_url).val() + "?" + window.last_base64_result, "_blank");
+    window.open($(goto_url).val() + "?" + get_base64_text(), "_blank");
 }
 function goto_url_get() {
     var url = $(goto_url).val();
-    var param = window.last_base64_result;
+    var param = get_base64_text();
     $('<form method="POST" target="_blank"></form>')
             .attr('action', url)
             .append($('<input type="hidden" />').attr(name, param))
             .appendTo('body').submit();
 }
 function on_input_value_change() {
+    window.last_base64_result = null;
 //    if ($(input_value).val()[0] != '{') {
 //        format();
 //    } else {
@@ -243,7 +243,9 @@ function output(convertion, json, base64) {
         base64 = convertion['base64'];
         convertion = convertion['convertion'];
     }
-    window.last_base64_result = base64;
+    if (base64){
+        window.last_base64_result = base64;
+    }
     var base64_p = document.createElement('p');
     base64_p.innerText = "BASE64: " + base64;
     $(log).prepend(base64_p);
@@ -304,21 +306,48 @@ function parseJson(code, throws){
 
 function decode64() {
     var result = Base64.decode($('#input_value').val());
-    output({ 'convertion': "BASE64 DECODE",
+    output({
+        'convertion': "BASE64 DECODE",
         'json': result,
-        'base64': $('#input_value').val() });
+        'base64': $('#input_value').val()
+    });
 }
 function encode64() {
-    var result = Base64.encode($('#input_value').val());
-    formatJson($('#input_value').val());
-    output({ 'convertion': "BASE64 ENCODE",
-        'json': $('#input_value').val(),
-        'base64': result });
+    var input = try_normalize_json($('#input_value').val());
+    var result = Base64.encode(input);
+    output({
+        'convertion': "BASE64 ENCODE",
+        'json': input,
+        'base64': result
+    });
 
+}
+
+function try_normalize_json(code){
+    var obj = parseJson(code);
+    if (!obj){
+        return code;
+    }
+    return JSON.stringify(code);
+}
+
+function right_of(needle, haystack, defaultValue){
+    var pos = haystack.indexOf(needle);
+    if (pos >= 0){
+        return haystack.substring(pos + 1);
+    }
+    return defaultValue !== undefined ? defaultValue : haystack;
+}
+
+function remove_http_url_prefix(rawInput) {
+    if ((rawInput.indexOf('?') > 0) && rawInput.trim().match(/^http:/g)){
+        return right_of('?', rawInput);
+    }
+    return rawInput;
 }
 function format() {
     var rawInput = $('#input_value').val();
-    var input = (rawInput.indexOf('?') > 0) ? rawInput.substring(rawInput.indexOf('?') + 1) : rawInput;
+    var input = remove_http_url_prefix(rawInput);
     var result = Base64.decode(input);
     result = formatJson(result);
     output({ 'convertion': "BASE64 DECODE TO JSON",
@@ -330,72 +359,76 @@ function repeat(s, count) {
     return new Array(count + 1).join(s);
 }
 function formatJson(json) {
-    var i = 0,
-            il = 0,
-            tab = "	",
-            newJson = "",
-            indentLevel = 0,
-            inString = false,
-            currentChar = null;
-    try {
-        for (i = 0, il = json.length; i < il; i += 1) {
-            currentChar = json.charAt(i);
-            switch (currentChar) {
-                case '{':
-                case '[':
-                    if (!inString) {
-                        newJson += currentChar + "\n" + repeat(tab, indentLevel + 1);
-                        indentLevel += 1;
-                    } else {
-                        newJson += currentChar;
-                    }
-                    break;
-                case '}':
-                case ']':
-                    if (!inString) {
-                        indentLevel -= 1;
-                        newJson += "\n" + repeat(tab, indentLevel) + currentChar;
-                    } else {
-                        newJson += currentChar;
-                    }
-                    break;
-                case ',':
-                    if (!inString) {
-                        newJson += ",\n" + repeat(tab, indentLevel);
-                    } else {
-                        newJson += currentChar;
-                    }
-                    break;
-                case ':':
-                    if (!inString) {
-                        newJson += ": ";
-                    } else {
-                        newJson += currentChar;
-                    }
-                    break;
-                case ' ':
-                case "\n":
-                case "\t":
-                    if (inString) {
-                        newJson += currentChar;
-                    }
-                    break;
-                case '"':
-                    if (i > 0 && json.charAt(i - 1) !== '\\') {
-                        inString = !inString;
-                    }
-                    newJson += currentChar;
-                    break;
-                default:
-                    newJson += currentChar;
-                    break;
-            }
-        }
-        return  JSON.stringify(JSON.parse(newJson), null, "   ");
-    } catch (e) {
-        var ret = '';
-        report_error('格式有误: ' + e);
+    if ($.type(json) == 'string'){
+        json = parseJson(json);
     }
+    return  JSON.stringify(json, null, "   ");
+//    var i = 0,
+//            il = 0,
+//            tab = "	",
+//            newJson = "",
+//            indentLevel = 0,
+//            inString = false,
+//            currentChar = null;
+//    try {
+//        for (i = 0, il = json.length; i < il; i += 1) {
+//            currentChar = json.charAt(i);
+//            switch (currentChar) {
+//                case '{':
+//                case '[':
+//                    if (!inString) {
+//                        newJson += currentChar + "\n" + repeat(tab, indentLevel + 1);
+//                        indentLevel += 1;
+//                    } else {
+//                        newJson += currentChar;
+//                    }
+//                    break;
+//                case '}':
+//                case ']':
+//                    if (!inString) {
+//                        indentLevel -= 1;
+//                        newJson += "\n" + repeat(tab, indentLevel) + currentChar;
+//                    } else {
+//                        newJson += currentChar;
+//                    }
+//                    break;
+//                case ',':
+//                    if (!inString) {
+//                        newJson += ",\n" + repeat(tab, indentLevel);
+//                    } else {
+//                        newJson += currentChar;
+//                    }
+//                    break;
+//                case ':':
+//                    if (!inString) {
+//                        newJson += ": ";
+//                    } else {
+//                        newJson += currentChar;
+//                    }
+//                    break;
+//                case ' ':
+//                case "\n":
+//                case "\t":
+//                    if (inString) {
+//                        newJson += currentChar;
+//                    }
+//                    break;
+//                case '"':
+//                    if (i > 0 && json.charAt(i - 1) !== '\\') {
+//                        inString = !inString;
+//                    }
+//                    newJson += currentChar;
+//                    break;
+//                default:
+//                    newJson += currentChar;
+//                    break;
+//            }
+//        }
+//        return  JSON.stringify(JSON.parse(newJson), null, "   ");
+//    } catch (e) {
+//        var ret = '';
+//        report_error('格式有误: ' + e);
+//    }
 
 }
 /* Base64加密解密 */
