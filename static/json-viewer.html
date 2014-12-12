@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JSON viewer</title>
+    <style type="text/css">
+        body{
+            background-color: #d3d3d3;
+        }
+        .output{
+            border-top: gray solid 1px;
+            overflow: auto;
+            max-width: 95vw;
+            max-height: 80vh;
+        }
+        .raw{
+            word-wrap: break-word;
+        }
+        h{
+            font-weight: bold;
+            font-size: 120%;
+        }
+        .json{
+            white-space: pre;
+        }
+        textarea{
+            width: 80vw;
+        }
+    </style>
+</head>
+<body>
+    <textarea id="param"  rows="15" ></textarea> <br/>
+    <input type="button" value="Decode From BASE64" onclick="javascript:decode_param();" />
+    <input type="button" value="View" onclick="javascript:view_json();" />
+    <br/>
+    <style type="text/css">
+        dl.json-viewer{
+            vertical-align: top;
+            font-size: 14px;
+            line-height: 18px;
+        }
+        dl.json-viewer > dt {
+            font-size: smaller;
+            cursor: pointer;
+        }
+        dl.json-viewer > dt.array{
+            color: darkgoldenrod;
+        }
+        dl.json-viewer > dt.object{
+            color: darkcyan;
+        }
+        dl.json-viewer dd > var, dl.json-viewer dd > i{
+            font-style: normal;
+        }
+        dl.json-viewer dd > var{
+            color: royalblue;
+        }
+        dl.json-viewer dd > var.array{
+            color: steelblue;
+        }
+        dl.json-viewer dd > i{
+            margin-right: 8px;
+            color: darkgreen;
+        }
+        dl.json-viewer dd > samp > dl{
+            display: inline-block;
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+        dl.json-viewer dd > samp > div{
+            display: inline-block;
+        }
+        dl.json-viewer dd > samp > dl > dd{
+            margin-left: 1px;
+        }
+        dl.json-viewer dd > samp.string{
+            color: blue;
+        }
+    </style>
+    <div id="json-viewer">
+
+    </div>
+    <script type="text/javascript" src="js/jquery.js" ></script>
+    <script type="text/javascript" src="js/json-formater.js"></script>
+    <script type="text/javascript" src="js/base64.js"></script>
+    <script type="text/javascript" src="js/json-viewer.js"></script>
+    <script type="text/javascript">
+        function view_json(){
+            var obj = parseJson($("#param").val());
+            var viewer = new JsonViewer({
+                renderTo: $('<div></div>').prependTo($("#json-viewer")),
+                json: obj
+            });
+            window.viewer = viewer;
+        }
+
+        function decode_param(){
+            var param = $("#param").val().trim();
+            if (param){
+                var base64 = Base64.decode(param);
+                base64 = base64 || param;
+                var output = formatJson(base64);
+                output = output || base64;
+                $("#param").val(output);
+            }
+        }
+        function parseJson(code, throws){
+            try{
+                code = ' function json_eval_function(){ return ' + code + ';}';
+                eval(code);
+                return json_eval_function();
+            }catch(e){
+                console.log(" Parse json failed: %o", e);
+                if (throws){
+                    throw e;
+                }
+                return null;
+            }
+        }
+    </script>
+</body>
+</html>
