@@ -40,3 +40,29 @@
         dl.json-viewer dd > samp.string{
             color: blue;
         }
+
+
+
+        .icon{
+            display: inline-block;
+        }
+        .icon-expander{
+            display: inline-block;
+            border-width: 5px;
+            position: relative;
+            top: 5px;
+            border-style: solid;
+            border-color: #000000 transparent transparent transparent;
+        }
+        .expanded .icon-expander{
+            display: inline-block;
+            position: relative;
+            top: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: transparent transparent #000000 transparent;
+        }
+
+        dl.json-viewer .icon-expander{
+            display: none;
+        }

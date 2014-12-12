@@ -70,6 +70,9 @@
             }
 
             var trigger = e;
+            if (trigger.children('.icon-expander').size() == 0){
+                trigger.prepend('<i class="icon icon-expander"></i>');
+            }
             trigger.on('expand', function(){
                 target.show();
                 trigger.addClass('expanded');

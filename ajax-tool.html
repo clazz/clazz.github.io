@@ -3,22 +3,35 @@
 <head>
     <title>Ajax Tool</title>
     <style type="text/css">
+        h1{
+            margin: 0;
+            font-size: 160%;
+        }
+        h2{
+            margin: 0;
+            font-size: 140%;
+        }
+        h3{
+            margin: 0;
+            font-size: 120%;
+        }
+        h4{
+            margin: 0;
+            font-size: 100%;
+        }
         body{
             background-color: #d3d3d3;
         }
         .output{
             border-top: gray solid 1px;
-            overflow: auto;
-            max-width: 95vw;
-            max-height: 80vh;
+            /*overflow: auto;*/
+            /*max-width: 95vw;*/
+            /*max-height: 80vh;*/
         }
         .raw{
             word-wrap: break-word;
         }
-        h{
-            font-weight: bold;
-            font-size: 120%;
-        }
+
         .json{
             white-space: pre;
         }
@@ -55,13 +68,13 @@
     <input type="button" value="Undo" onclick="javascript:undo_it();" title="Are your regretting? Click here to undo it." />
     <input type="button" value="Redo" onclick="javascript:redo_it();" title="Are your regretting of having undone something? Click here to redo it." />
     <br/>
-    <h2>Ouput:</h2>
-    <div id="output" class="">
-        <h>Pretty JSON:</h>
+    <div id="output" class="" style="display: none">
+        <h2>Ouput:</h2>
+        <h3>Pretty JSON:</h3>
         <div id="json-output" class="json output"></div>
-        <h>After base64 decode:</h>
+        <h3>After base64 decode:</h3>
         <div id="base64-output" class="base64 output"></div>
-        <h>Raw:</h>
+        <h3>Raw:</h3>
         <div id="raw-output" class="raw output"></div>
     </div>
     <hr/>
@@ -71,6 +84,7 @@
     </div>
     <script type="text/javascript" src="js/jquery.js" ></script>
     <script type="text/javascript" src="js/external/jquery.indexeddb.js" ></script>
+    <link type="text/css" rel="stylesheet" href="css/json-viewer.css" />
     <script type="text/javascript" src="js/json-viewer.js"></script>
     <script type="text/javascript" src="js/json-formater.js"></script>
     <script type="text/javascript" src="js/base64.js"></script>
@@ -193,17 +207,18 @@
                     var jsonPretty = JSON.stringify(jsonParam, null, '    ');
                     param = Base64.encode(JSON.stringify(jsonParam));
                 } else {
+                    try{
+                        var jsonPretty = JSON.stringify(parseJson(Base64.decode(param)), null, '    ');
+                    }catch(e){}
                     param = param;
                 }
                 if ($("#method").val() == 'GET'){
-                    url = url + "?" + param;
-                    param = {};
+                    ajaxOptions.url = url + "?" + param;
                 }else{
-                    url = url;
+                    ajaxOptions.url = url;
                     ajaxOptions.data = param;
                     ajaxOptions.dataType = 'text';
                 }
-                ajaxOptions.url = url;
             }
             console.log(" URL: " + url);
             console.log(" Ajax params: %o", ajaxOptions);
@@ -251,13 +266,21 @@
         }
 
         function render_and_prepend_log(data) {
-            var logItem = $('#log-item-template').clone().removeAttr('id');
+            var uiLogItemId = 'log-' + data.id;
+            var logItem = $('#log-item-template').clone().removeAttr('id').attr('id', uiLogItemId);
             logItem.find('.request .type').text(data.request.type);
             logItem.find('.request .url').text(data.request.url);
             logItem.find('.request .param').text(data.request.param);
             logItem.find('.request .jsonPretty').text(data.request.jsonPretty);
             logItem.find('.response .base64').text(data.response.base64);
-            logItem.find('.response .jsonNormal').text(data.response.json);
+            if ($.type(data.response.json) == 'object'){
+                new JsonViewer({
+                    renderTo: logItem.find('.response .jsonNormal'),
+                    json: data.response.json
+                });
+            }else{
+                logItem.find('.response .jsonNormal').text(data.response.json);
+            }
             logItem.find('.response .jsonPretty').text(data.response.jsonPretty);
             logItem.find('.response .raw').text(data.response.raw);
             logItem.find('.id').text(data.id);
@@ -266,6 +289,7 @@
                 logItem.remove();
             });
             logItem.prependTo('#log');
+            location.hash = '#' + uiLogItemId;
             logItem.find('h3,h4').initExpander(true);
         }
         function log_it(response, request){
@@ -395,18 +419,11 @@
             };
 
             self.find = function(key){
-                return db.transaction([storeName]).then(function () {
-                    log("Transaction completed");
-                }, function () {
-                    log("Transaction aborted");
-                }, function (t) {
-                    log("Transaction in progress");
-                    t.objectStore(storeName).get(key).then(function (value) {
+                return db.objectStore(storeName).get(key).then(function (value) {
                         log("Data got %o", arguments);
                     }, function () {
                         log("Error getting data");
                     });
-                });
             }
 
             self.each = function(iterator){
@@ -448,6 +465,11 @@
             return this;
         }
 
+
+        $(function(){
+            $('h1,h2,h3,h4,h').initExpander(true);
+        });
+
     </script>
     <div id="log-item-template" class="log-item">
         <div>LOG ID: <span class="id"></span><input type="button" class="delBtn" value="DELETE" /></div>
@@ -461,11 +483,7 @@
 
             </p>
             <h4>Pretty JSON:</h4>
-            <pre>
-                <code class="jsonPretty json">
-
-                </code>
-            </pre>
+            <pre><code class="jsonPretty json"></code></pre>
         </div>
         <h3>Response</h3>
         <div class="response">
