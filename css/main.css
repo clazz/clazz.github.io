@@ -1,0 +1,23 @@
+
+body{
+    width: auto;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+.header, .footer, .body{
+    width: auto;
+    margin: 0;
+    padding: 1em 4em;
+    align-self: center;
+}
+.body{
+    min-height: 70vh;
+}
+
+code{
+    white-space: pre;
+}
+article p{
+    white-space: pre;
+}
