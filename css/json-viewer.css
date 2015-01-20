@@ -53,6 +53,7 @@
             top: 5px;
             border-style: solid;
             border-color: #000000 transparent transparent transparent;
+            cursor: pointer;
         }
         .expanded .icon-expander{
             display: inline-block;
