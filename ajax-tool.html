@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Ajax Tool</title>
+    <link type="text/css" rel="stylesheet" href="css/json-viewer.css" />
     <style type="text/css">
         h1{
             margin: 0;
@@ -54,6 +55,37 @@
             word-wrap: break-word;
             white-space: normal;
         }
+        .notice-wrapper{
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: auto;
+            z-index: 100000;
+            color: red;
+            font-weight: bold;
+        }
+        .notice{
+            display: block;
+            width: 30em;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 0.6em;
+            border-radius: 5px;
+            background-color: seashell;
+            box-shadow: 1px 1px gray;
+        }
+        .notice .msg{
+            display: inline-block;
+            white-space: pre;
+        }
+        .notice .close-btn{
+            display: inline-block;
+            float: right;
+            border: none;
+            cursor: pointer;
+            background: transparent;
+        }
     </style>
 </head>
 <body>
@@ -62,14 +94,15 @@
         <option value="POST">POST</option>
     </select>
     <input type="text" id="url" placeholder="please input url.." style="width: 80em"
-           onchange="javascript:split_url()" />
+            />
     <br/>
     <label>With parameters:</label><br/>
-    <textarea id="param"  rows="15" onchange="auto_expand(this);"></textarea> <br/>
+    <textarea id="param"  rows="15" ></textarea> <br/>
     <input type="button" value="SEND" onclick="javascript:send_request();" />
     <input type="button" value="Split URL" onclick="javascript:split_url();" />
     <input type="button" value="Decode PARAM" onclick="javascript:decode_param();" />
     <input type="button" value="Encode PARAM" onclick="javascript:encode_param();" />
+    <input type="button" value="Format JSON" onclick="javascript:format_json();" />
     <input type="button" value="Undo" onclick="javascript:undo_it();" title="Are your regretting? Click here to undo it." />
     <input type="button" value="Redo" onclick="javascript:redo_it();" title="Are your regretting of having undone something? Click here to redo it." />
     <br/>
@@ -90,7 +123,6 @@
     </div>
     <script type="text/javascript" src="js/jquery.js" ></script>
     <script type="text/javascript" src="js/external/jquery.indexeddb.js" ></script>
-    <link type="text/css" rel="stylesheet" href="css/json-viewer.css" />
     <script type="text/javascript" src="js/json-viewer.js"></script>
     <script type="text/javascript" src="js/json-formater.js"></script>
     <script type="text/javascript" src="js/base64.js"></script>
@@ -150,7 +182,7 @@
             var value = $(textArea).val();
             var lines = value.split("\n") || [];
             if (lines.length > 10){
-                $(textArea).css('height', lines.length * 1.14+'em');
+                $(textArea).css('height', Math.min(lines.length * 1.14, 30) + 'em');
             }
         }
         function split_url(){
@@ -183,6 +215,31 @@
                 }
                 set_param(base64);
             }
+        }
+        function format_json(){
+            var param = $("#param").val().trim();
+            if (param){
+                try {
+                    var jsonParam = parseJson(param, true);
+                    if (jsonParam) {
+                        set_param(JSON.stringify(jsonParam, null, '  '));
+                    } else {
+                        notice('JSON对象为空！');
+                    }
+                } catch(e){
+                    notice(e.message);
+                }
+            }
+        }
+        function notice(msg, clearPrevious){
+            clearPrevious = (clearPrevious === undefined) ? true : !!clearPrevious;
+            if (clearPrevious){
+                $('.notice-wrapper').remove();
+            }
+
+            var notice = $('<div class="notice-wrapper"><div class="notice"><div class="msg" ></div><button class="close-btn">X</button></div></div>').prependTo('body').fadeIn();
+            notice.find('.msg').text(msg);
+            notice.find('.close-btn').on('click', function(){ notice.remove(); });
         }
         function parseJson(code, throws){
             try{
@@ -355,6 +412,13 @@
         window.logItemDb = new LogItemDb();
 
 
+        /**
+         * 数据库
+         * @param dbName
+         * @param storeName
+         * @returns {MyDbStore}
+         * @constructor
+         */
         function MyDbStore(dbName, storeName){
             var self = this;
             dbName = dbName || '__default__';
@@ -366,6 +430,7 @@
                     }
                 }
             });
+
             var isLogEnabled = true;
 
             function log(){
@@ -429,11 +494,15 @@
             };
 
             self.find = function(key){
-                return db.objectStore(storeName).get(key).then(function (value) {
+                var dfd = $.Deferred();
+                db.objectStore(storeName).get(key).then(function (value) {
                         log("Data got %o", arguments);
-                    }, function () {
+                        dfd.resolve(value);
+                    }, function (e) {
                         log("Error getting data");
+                        dfd.reject(e);
                     });
+                return dfd.promise();
             }
 
             self.each = function(iterator){
