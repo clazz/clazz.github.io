@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link type="text/css" rel="stylesheet" href="index.css">
+    <title>JSON viewer</title>
+</head>
+<body>
+    <textarea id="param"  rows="15" ></textarea> <br/>
+    <input type="button" value="Decode From BASE64" onclick="javascript:decode_param();" />
+    <input type="button" value="View" onclick="javascript:view_json();" />
+    <br/>
+    <div id="json-viewer">
+
+    </div>
+    <script type="text/javascript" src="../../js/jquery.js" ></script>
+    <script type="text/javascript" src="../../js/json-formater.js"></script>
+    <script type="text/javascript" src="../../js/base64.js"></script>
+    <script type="text/javascript" src="../../js/json-viewer.js"></script>
+    <script type="text/javascript" src="../common/common.js"></script>
+    <script type="text/javascript" src="index.js"></script>
+</body>
+</html>

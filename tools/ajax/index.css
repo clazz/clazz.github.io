@@ -1,0 +1,80 @@
+h1{
+    margin: 0;
+    font-size: 160%;
+}
+h2{
+    margin: 0;
+    font-size: 140%;
+}
+h3{
+    margin: 0;
+    font-size: 120%;
+}
+h4{
+    margin: 0;
+    font-size: 100%;
+}
+
+.output{
+    border-top: gray solid 1px;
+    /*overflow: auto;*/
+    /*max-width: 95vw;*/
+    /*max-height: 80vh;*/
+}
+.raw{
+    word-wrap: break-word;
+}
+
+.json{
+    white-space: pre;
+}
+textarea{
+    width: 80vw;
+}
+.log-item{
+    margin: 0.5em;
+    padding: 0.5em;
+    border: whitesmoke 1px solid;
+}
+#log-item-template-wrapper{
+    display: none;
+}
+.log-item .delBtn{
+    margin-left: 4em;
+}
+.param{
+    max-width: 90vw;
+    word-wrap: break-word;
+    white-space: normal;
+}
+.notice-wrapper{
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: auto;
+    z-index: 100000;
+    color: red;
+    font-weight: bold;
+}
+.notice{
+    display: block;
+    width: 30em;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0.6em;
+    border-radius: 5px;
+    background-color: seashell;
+    box-shadow: 1px 1px gray;
+}
+.notice .msg{
+    display: inline-block;
+    white-space: pre;
+}
+.notice .close-btn{
+    display: inline-block;
+    float: right;
+    border: none;
+    cursor: pointer;
+    background: transparent;
+}

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Interface Speed Tester</title>
+</head>
+<body>
+    <form action="#">
+        URL: <input type="text" name="url" id="url" width="100%" style="width:100%" /> <br/>
+        COUNT: <input type="text" name="count" id="count" value="20" />
+        METHOD: <select id="method" name="method" >
+            <option value="GET" >GET</option>
+            <option value="POST" >POST</option>
+            <option value="PUT">PUT</option>
+            <option value="DELETE">DELETE</option>
+            <option value="HEAD">HEAD</option>
+        </select>
+        <input type="checkbox" id="sync" name="sync" />sync
+        <input type="button" onclick="javascript:doRequest();" value="Do Request" />
+        <br/>
+        Process: <input type="checkbox" value="Checked" id="append" name="append" />append
+        <div id="process_indicator" ></div>
+        <div id="result">
+
+        </div>
+    </form>
+    <script type="text/javascript" src="../common/common.js"></script>
+    <script type="text/javascript" src="index.js"></script>
+</body>
+</html>

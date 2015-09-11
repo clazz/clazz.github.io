@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Base64&JSON解析</title>
+    <link type="text/css" rel="stylesheet" href="../../styles/shCoreDefault.css">
+    <link type="text/css" rel="stylesheet" href="../../css/json-viewer.css">
+    <link type="text/css" rel="stylesheet" href="index.css">
+</head>
+<body>
+<div id="ta">
+    <h3>Base64解密-JSON解析</h3>
+
+    <div>
+        <input type="button" value="Base64解密 & ShowJSON" id="test1" onclick="format();"/>
+        <input type="button" value="Base64解密" id="test2" onclick="decode64()"/>
+        <input type="button" value="Base64加密" id="test2" onclick="encode64()"/>
+        <input type="hidden" value="测试" id="22" onclick="decode()"/>
+        <input type="button" value="Copy OUTPUT" onclick="do_copy_output()"/>
+        <input type="button" value="Swap INPUT <-> OUTPUT" onclick="do_swap()"/>
+    </div>
+    <div id="err"></div>
+</div>
+<table>
+    <thead>
+    <tr>
+        <td>Input</td>
+        <td>Output</td>
+    </tr>
+    </thead>
+    <tr>
+        <td>
+            <textarea id="input_value" onchange="javascript:on_input_value_change();"
+                      placeholder="input base64 or url"></textarea>
+        </td>
+        <td>
+            <textarea id="output_value" readonly="readonly" placeholder="output base64 or url"></textarea>
+        </td>
+    </tr>
+</table>
+
+<div>
+    <input type="text" id="goto_url" name="goto_url" style="width: 100%"
+           value="" onchange="on_goto_url_change()" />
+    <select id="goto_url_select" name="goto_url_select" onchange="javascirpt:on_goto_url_selection_change()">
+    </select>
+    <input type="button" value="GOTO URL(GET, Using base64 as GET param)" onclick="goto_url_get()"/>
+    <input type="button" value="DO GET & PARSE" onclick="do_get_and_parse()" />
+    <input type="button" value="GOTO URL(POST, Using base64 as POST param)" onclick="goto_url_post()"/>
+    <input type="button" value="DO POST & PARSE" onclick="do_post_and_parse()" />
+</div>
+<div id="log"></div>
+
+<script type='text/javascript' src='../../js/jquery.js'></script>
+<script type="text/javascript" src="../../scripts/shCore.js"></script>
+<script type="text/javascript" src="../../scripts/shBrushJScript.js"></script>
+<script type="text/javascript" src="../../js/json-viewer.js"></script>
+<script type="text/javascript" src="../common/common.js"></script>
+<script type="text/javascript" src="index.js"></script>
+</body>
+</html>

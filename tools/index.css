@@ -1,0 +1,10 @@
+#header{
+    width: 100%;
+    height: auto;
+}
+#header a {
+    display: inline-block;
+    border: 1px solid #acaacc;
+    border-radius: 5px;
+    padding: 5px;
+}
