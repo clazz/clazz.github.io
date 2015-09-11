@@ -28,9 +28,6 @@ h4{
 .json{
     white-space: pre;
 }
-textarea{
-    width: 80vw;
-}
 .log-item{
     margin: 0.5em;
     padding: 0.5em;
@@ -39,8 +36,12 @@ textarea{
 #log-item-template-wrapper{
     display: none;
 }
-.log-item .delBtn{
-    margin-left: 4em;
+.log-item button{
+    float: right;
+    cursor: pointer;
+}
+.log-item button:hover{
+    color: #ff8000;
 }
 .param{
     max-width: 90vw;
@@ -77,4 +78,53 @@ textarea{
     border: none;
     cursor: pointer;
     background: transparent;
+}
+.request, .response{
+    padding-left: 2em;
+}
+#status{
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    padding: 0 1em;
+    margin: 0;
+    border: none;
+
+    background-color: #000000;
+    color: #fff;
+    z-index: 999999;
+}
+.time-elapsed{
+    float: right;
+}
+.center{
+    clear: both;
+    margin-left: auto;
+    margin-right: auto;
+}
+.main{
+    display: block;
+    margin-top: -1.5em;
+    max-width: 1000px;
+    min-width: 500px;
+}
+#param{
+    display: block;
+    width: 100%;
+}
+#method{
+    display: block;
+    width: 5em;
+    float: left;
+    position: relative;
+    top: 1.5em;
+    z-index: 2;
+}
+#url{
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    padding-left: 5em;
+    position: relative;
+    z-index: 1;
 }

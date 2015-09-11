@@ -7,78 +7,31 @@
 </head>
 <body>
 <div class="content">
-    <select id="method">
-        <option value="GET">GET</option>
-        <option value="POST">POST</option>
-    </select>
-    <input type="text" id="url" placeholder="please input url.." style="width: 80em"
-            />
-    <br/>
-    <label>With parameters:</label><br/>
-    <textarea id="param" rows="15"></textarea> <br/>
-    <input type="button" value="SEND" onclick="javascript:send_request();"/>
-    <input type="button" value="Split URL" onclick="javascript:split_url();"/>
-    <input type="button" value="Decode PARAM" onclick="javascript:decode_param();"/>
-    <input type="button" value="Encode PARAM" onclick="javascript:encode_param();"/>
-    <input type="button" value="Format JSON" onclick="javascript:format_json();"/>
-    <input type="button" value="Undo" onclick="javascript:undo_it();"
-           title="Are your regretting? Click here to undo it."/>
-    <input type="button" value="Redo" onclick="javascript:redo_it();"
-           title="Are your regretting of having undone something? Click here to redo it."/>
-    <br/>
-
-    <div id="output" class="" style="display: none">
-        <h2>Ouput:</h2>
-
-        <h3>Pretty JSON:</h3>
-
-        <div id="json-output" class="json output"></div>
-        <h3>After base64 decode:</h3>
-
-        <div id="base64-output" class="base64 output"></div>
-        <h3>Raw:</h3>
-
-        <div id="raw-output" class="raw output"></div>
-    </div>
-    <hr/>
-    <h2>History:</h2>
-
-    <div id="log">
-
-    </div>
-    <div id="log-item-template-wrapper" style="display: none">
-        <div id="log-item-template" class="log-item">
-            <div>LOG ID: <span class="id"></span><input type="button" class="delBtn" value="DELETE"/></div>
-            <h3>Request</h3>
-
-            <div class="request">
-                <h4>
-                    <span class="type" style="margin-right: 2em"></span><span class="url"
-                                                                              style="font-weight: normal"></span>
-                </h4>
-                <h4>With PARAM:</h4>
-
-                <p class="param">
-
-                </p>
-                <h4>Pretty JSON:</h4>
-                <pre><code class="jsonPretty json"></code></pre>
-            </div>
-            <h3>Response</h3>
-
-            <div class="response">
-                <h4>Pretty JSON</h4>
-                <pre><code class="jsonPretty json"></code></pre>
-                <h4>JSON</h4>
-                <pre><code class="jsonNormal json"></code></pre>
-                <h4>BASE64</h4>
-
-                <p class="base64"></p>
-                <h4>RAW</h4>
-
-                <p class="raw"></p>
-            </div>
+    <div class="main center">
+        <select id="method">
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+        </select>
+        <input type="text" id="url" placeholder="please input url.." />
+        <br/>
+        <label>With parameters:</label><br/>
+        <textarea id="param" rows="15"></textarea> <br/>
+        <input type="button" value="SEND" onclick="javascript:send_request();"/>
+        <input type="button" value="Split URL" onclick="javascript:split_url();"/>
+        <input type="button" value="Decode PARAM" onclick="javascript:decode_param();"/>
+        <input type="button" value="Encode PARAM" onclick="javascript:encode_param();"/>
+        <input type="button" value="Format JSON" onclick="javascript:format_json();"/>
+        <input type="button" value="Undo" onclick="javascript:undo_it();"
+               title="Are your regretting? Click here to undo it."/>
+        <input type="button" value="Redo" onclick="javascript:redo_it();"
+               title="Are your regretting of having undone something? Click here to redo it."/>
+        <br/>
+        <div id="status"></div>
+        <div id="output" class="" style="display: none">
         </div>
+        <hr/>
+        <h2>History:</h2>
+        <div id="log"></div>
     </div>
 </div>
 <script type="text/javascript" src="../../js/jquery.js"></script>
@@ -86,7 +39,10 @@
 <script type="text/javascript" src="../../js/json-viewer.js"></script>
 <script type="text/javascript" src="../../js/json-formater.js"></script>
 <script type="text/javascript" src="../../js/base64.js"></script>
+<script type="text/javascript" src="../../js/ejs/ejs_production.js"></script>
 <script type="text/javascript" src="../common/common.js"></script>
 <script type="text/javascript" src="index.js"></script>
+<script type="text/template" src="log-item.ejs" async="async"></script>
+<script type="text/template" src="ajax-status.ejs" async="async"></script>
 </body>
 </html>

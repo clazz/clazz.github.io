@@ -25,7 +25,7 @@
         if (['array', 'string', 'boolean', 'null', 'object', 'number', 'undefined'].indexOf(type) >= 0){
             return type;
         }else{
-            console.log("Unsupported type %o of %o.", type, something);
+            console.error("Unsupported type %o of %o.", type, something);
             return 'unknown';
         }
     }
@@ -45,14 +45,6 @@
             default:
                 return { body: something+'', type: type};
         }
-//        if ($.isArray(something)){
-//            return '['+makeTitle(something+"")+']';
-//        }else if(null === something){
-//            return 'null';
-//        }else if('string' === typeof(something)){
-//            var lines = something.split("\n");
-//            return lines.length > 3 ? lines[0] : (something.length > 10 ? something.substr(0, 10) + '...' : something);
-//        }
     }
 
     function initExpander(triggers, defaultExpand){
@@ -82,13 +74,13 @@
                 trigger.removeClass('expanded');
             })
             trigger.on('toggle-expand', function(){
-                console.log("toggle-expand... %o", this);
                 target.toggle();
                 trigger.toggleClass('expanded');
             });
             trigger.on('click', function(){
                 trigger.trigger('toggle-expand');
             });
+            trigger.css({cursor: 'pointer'});
         });
         if (!defaultExpand){
             triggers.trigger('shrink');

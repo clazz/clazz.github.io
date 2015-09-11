@@ -1,4 +1,8 @@
-var ToolsBasePath = /tools(\/?)$/.test(window.location.pathname) ? '.' : '..';
+var ToolsBasePath = getCurrentScriptPath() + '/..';
+var ToolsCfg = getCurrentScriptConfig({
+    header: true,
+    footer: true
+});
 
 // load js, if needed
 if (!window.$){
@@ -22,20 +26,21 @@ $(function(){
             $this.attr('href', ToolsBasePath + '/common/' + $this.attr('href'));
         });
         if ($body.find('.content').size() > 0){
-            $header.prependTo($body);
-            $footer.appendTo($body);
+            ToolsCfg.header && $header.prependTo($body);
+            ToolsCfg.footer && $footer.appendTo($body);
         } else {
             $body.addClass('content');
-            $header.insertBefore($body);
-            $footer.insertAfter($body);
+            ToolsCfg.header && $header.insertBefore($body);
+            ToolsCfg.footer && $footer.insertAfter($body);
         }
 
-        setTimeout(function(){
-            if (!window.scrollY){
-                window.scrollBy(0, $header.height());
-                console.log('scroll %o', $header.height());
-            }
-        },100);
+        if (ToolsCfg.header){
+            setTimeout(function(){
+                if (!window.scrollY){
+                    window.scrollBy(0, $header.height());
+                }
+            },100);
+        }
     });
 });
 
@@ -59,6 +64,41 @@ function includeHtml(src, callbacks){
     return $.get(src);
 }
 
+function getCurrentScriptData(key){
+    var dataSet = (document.currentScript || {}).dataset || {};
+    return dataSet[(key||'').toLowerCase()];
+}
+
+function getCurrentScriptConfig(defaultCfg){
+    var data = {};
+    var cfgStr = getCurrentScriptData('cfg');
+    if (cfgStr){
+        try{
+            data = JSON.parse(cfgStr);
+        }catch(e){
+            try{
+                eval('data = ' + cfgStr + ';');
+            }catch(e){}
+        }
+    }
+
+    data = data || {};
+
+    if (defaultCfg){
+        for (var i in defaultCfg){
+            if (!(i in data)){
+                data[i] = defaultCfg[i];
+            }
+        }
+    }
+
+    return data;
+}
+
+function getCurrentScriptPath(){
+    return (document.currentScript || {}).src + "/.."
+}
+
 
 // google analytics:
 (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -67,4 +107,5 @@ m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 ga('create', 'UA-67468647-1', 'auto');
 ga('send', 'pageview');
+
 

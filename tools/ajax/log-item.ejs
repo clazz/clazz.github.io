@@ -1,0 +1,33 @@
+<div class="log-item" id="<%= id %>">
+    <div>
+        LOG ID: <span class="id"><%= id %></span>
+        <button type="button" class="delBtn" >DELETE</button>
+        <button type="button" class="resendBtn" >RESEND</button>
+        <button type="button" class="refillBtn" >REFILL</button>
+    </div>
+
+    <h3>Request</h3>
+    <div class="request">
+        <h4>
+            <span class="type" style="margin-right: 2em"><%= request.type %> </span>
+            <span class="url" style="font-weight: normal"><%= request.url %></span>
+        </h4>
+        <h4>With PARAM:</h4>
+        <p class="param"><%= request.param %></p>
+        <h4>Pretty JSON:</h4>
+        <pre><code class="jsonPretty json"><%= request.jsonPretty %></code></pre>
+    </div>
+
+
+    <h3>Response<% if (response.elapsedTimeInSeconds){ %> <span class="time-elapsed">+<%= response.elapsedTimeInSeconds%>s</span> <% } %></h3>
+    <div class="response">
+        <h4>Pretty JSON</h4>
+        <pre><code class="jsonPretty json"><%= response.jsonPretty %></code></pre>
+        <h4>JSON Decoded</h4>
+        <pre><code class="jsonNormal json"><%= response.json %></code></pre>
+        <h4>Base64 Decoded</h4>
+        <p class="base64"><%= response.base64 %></p>
+        <h4>Raw Response</h4>
+        <p class="raw"><%= response.raw %></p>
+    </div>
+</div>

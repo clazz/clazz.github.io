@@ -1,5 +1,3 @@
-
-
 function EncodeDecodeHistory(){
     var self = this;
     self.data = { name: 'EncodeDecodeHistory', history: [] };
@@ -129,9 +127,6 @@ function parseJson(code, throws){
 function send_request(){
     var ajaxOptions = {
         type: $("#method").val(),
-        complete: function(){
-            console.log("complete: %o", arguments);
-        }
     };
     var url = $("#url").val();
     var param = $("#param").val().trim();
@@ -155,82 +150,146 @@ function send_request(){
             ajaxOptions.dataType = 'text';
         }
     }
-    console.log(" URL: " + url);
-    console.log(" Ajax params: %o", ajaxOptions);
-    clear_output();
-    $.ajax(ajaxOptions).done(function(data){
-        on_got_output(data, { url: url, param: param, type: ajaxOptions.type, jsonPretty: jsonPretty });
-        location.hash='#output';
-    }).fail(function(jqXHR, error, msg){
-        if (jqXHR && jqXHR.responseText){  // 有的时候根据返回的application/type解析会出错，但是实际上已经返回值了的。
-            on_got_output(jqXHR.responseText, { url: url, param: param, type: ajaxOptions.type, jsonPretty: jsonPretty });
+    console.log(" Start Ajax request. URL: %o with params: %o", url, ajaxOptions);
+
+    do_ajax(ajaxOptions, function(text, elapsedTimeInSeconds){
+        if (text){
+            on_got_output({
+                text: text,
+                elapsedTimeInSeconds: elapsedTimeInSeconds
+            }, {
+                url: url,
+                param: param,
+                type: ajaxOptions.type,
+                jsonPretty: jsonPretty
+            });
             location.hash='#output';
-            return;
         }
-        console.log(" Ajax failed: %o, %o (%o)", msg, this, arguments);
-        $("#raw-output").text(" Ajax failed: " + msg);
-    }).progress(function(){
-        console.log('progress: %o', arguments);
     });
 }
-function clear_output(){
-    $("#raw-output, #base64-output, #json-output").empty();
+
+function do_ajax(opt, done){
+    var $status = $('#status');
+    var statusTemplate = (do_ajax.statusTemplate = (do_ajax.statusTemplate || new EJS({url: 'ajax-status.ejs'})));
+    var xhr = new XMLHttpRequest();
+    var startTime = new Date();
+
+    if (do_ajax.timerId){
+        clearInterval(do_ajax.timerId);
+    }
+
+    do_ajax.timerId = setInterval(function(){
+        report_status();
+    });
+
+    xhr.onreadystatechange = function(){
+        report_status();
+        if (4 == xhr.readyState && 200 == xhr.status){
+            clearInterval(do_ajax.timerId);
+            done && done.call && done(xhr.responseText, +(new Date() - startTime) / 1000);
+        }
+    };
+
+    xhr.open(opt.type.toLowerCase(), opt.url, true);
+    xhr.send(opt.data);
+
+    function report_status(){
+        $status.html(statusTemplate.render({
+            readyState: xhr.readyState,
+            readyStateText: humanize_xhr_ready_state(xhr.readyState),
+            status: xhr.status,
+            statusText: xhr.statusText,
+            seconds: ((+(new Date() - startTime) / 1000) + '').replace(/(\.\d)\d*/,'$1')
+        }));
+    }
 }
 
-function on_got_output(output, request){
-    console.log("Raw output:: %o", {output: output});
-    $("#raw-output").text(output);
+function humanize_xhr_ready_state(readyState){
+    switch (readyState){
+        case 0: return 'UNSET';
+        case 1: return 'OPENED';
+        case 2: return 'HEADERS_RECEIVED';
+        case 3: return 'LOADING';
+        case 4: return 'DONE';
+    }
+}
+
+function on_got_output(response, request){
+    console.log("Raw output:: %o", {output: response.text});
     try{
-        var base64 = Base64.decode(output);
+        var base64 = Base64.decode(response.text);
         console.log("Base64 decoded: %o", {base64: base64});
-        $("#base64-output").text(base64);
         try{
             var json = parseJson(base64);
             console.log("JSON: %o", {json: json});
             var jsonPretty = formatJson(base64);
-            $("#json-output").text(jsonPretty);
         }catch(e){
             console.log("Failed to decode json: %o", e);
             console.log(e.stack);
-            $("#json-output").text("Invalid JSON!");
         }
     }catch(e){
         console.log("Failed to decode base64: %o", e);
         console.log(e.stack);
-        $("#base64-output").text("Invalid base64!");
     }
-    log_it({ base64: base64, json: json, jsonPretty: jsonPretty, raw: output }, request);
+
+    log_it({
+        base64: base64,
+        json: json,
+        jsonPretty: jsonPretty,
+        raw: response.text,
+        elapsedTimeInSeconds: response.elapsedTimeInSeconds
+    }, request);
+
+    var $output = $('#output').html($('#log .log-item:first .response').html()).show();
+    $output.find('h3,h4').initExpander(true);
+    $output.find('h4:not(:first)').trigger('shrink');
 }
 
-function render_and_prepend_log(data, noJumpToNewLogItem) {
+/**
+ * 渲染并追加日志
+ * @param data
+ * @param opt object {jump: true}
+ */
+function render_and_prepend_log(data, opt) {
     var uiLogItemId = 'log-' + data.id;
-    var logItem = $('#log-item-template').clone().removeAttr('id').attr('id', uiLogItemId);
-    logItem.find('.request .type').text(data.request.type);
-    logItem.find('.request .url').text(data.request.url);
-    logItem.find('.request .param').text(data.request.param);
-    logItem.find('.request .jsonPretty').text(data.request.jsonPretty);
-    logItem.find('.response .base64').text(data.response.base64);
+    var $logItem = $(new EJS({url:'log-item.ejs'}).render(data)).attr('id', uiLogItemId);
+
     if ($.type(data.response.json) == 'object'){
         new JsonViewer({
-            renderTo: logItem.find('.response .jsonNormal'),
+            renderTo: $logItem.find('.response .jsonNormal'),
             json: data.response.json
         });
-    }else{
-        logItem.find('.response .jsonNormal').text(data.response.json);
     }
-    logItem.find('.response .jsonPretty').text(data.response.jsonPretty);
-    logItem.find('.response .raw').text(data.response.raw);
-    logItem.find('.id').text(data.id);
-    logItem.find('.delBtn').on('click', function(){
+
+    $logItem.find('.delBtn').on('click', function(){
         logItemDb.remove(data);
-        logItem.remove();
+        $logItem.remove();
+        return false;
     });
-    logItem.prependTo('#log');
-    if (!noJumpToNewLogItem){
+
+    $logItem.find('.refillBtn').on('click', function(){
+        $('#method').val(data.request.type);
+        $('#url').val(data.request.url);
+        set_param(data.request.jsonPretty);
+        window.location.hash = '#url';
+        try{ $('#url')[0].scrollIntoView(); }catch(e){}
+        return false;
+    });
+
+    $logItem.find('.resendBtn').on('click', function(){
+        $logItem.find('.refillBtn').click();
+        send_request();
+    });
+
+    $logItem.prependTo('#log');
+    $logItem.find('h3,h4').initExpander(true);
+    $logItem.find('.response h4:not(:first)').trigger('shrink');
+
+    if (opt && opt.jump){
         location.hash = '#' + uiLogItemId;
     }
-    logItem.find('h3,h4').initExpander(true);
 }
+
 function log_it(response, request){
     var data = {
         request: request,
@@ -238,12 +297,12 @@ function log_it(response, request){
     };
 
     logItemDb.add(data);
-    render_and_prepend_log(data);
+    render_and_prepend_log(data, {jump: true});
 }
 
 function load_log_items(){
     logItemDb.each(function(item){
-        render_and_prepend_log(item, true);
+        render_and_prepend_log(item);
     });
 }
 
@@ -303,7 +362,7 @@ function MyDbStore(dbName, storeName){
         }
     });
 
-    var isLogEnabled = true;
+    var isLogEnabled = false;
 
     function log(){
         if (isLogEnabled){
