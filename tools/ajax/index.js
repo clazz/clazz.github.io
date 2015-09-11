@@ -180,7 +180,7 @@ function do_ajax(opt, done){
 
     do_ajax.timerId = setInterval(function(){
         report_status();
-    });
+    }, 100);
 
     xhr.onreadystatechange = function(){
         report_status();
