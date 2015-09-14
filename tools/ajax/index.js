@@ -126,7 +126,7 @@ function parseJson(code, throws){
 }
 function send_request(){
     var ajaxOptions = {
-        type: $("#method").val(),
+        type: $("#method").val()
     };
     var url = $("#url").val();
     var param = $("#param").val().trim();
@@ -434,7 +434,7 @@ function MyDbStore(dbName, storeName){
             dfd.reject(e);
         });
         return dfd.promise();
-    }
+    };
 
     self.each = function(iterator){
         return db.transaction([storeName]).then(function () {
@@ -479,3 +479,4 @@ function MyDbStore(dbName, storeName){
 $(function(){
     $('h1,h2,h3,h4,h').initExpander(true);
 });
+

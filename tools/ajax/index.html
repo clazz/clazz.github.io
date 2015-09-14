@@ -8,14 +8,20 @@
 <body>
 <div class="content">
     <div class="main center">
-        <select id="method">
-            <option value="GET">GET</option>
-            <option value="POST">POST</option>
-        </select>
-        <input type="text" id="url" placeholder="please input url.." />
-        <br/>
-        <label>With parameters:</label><br/>
-        <textarea id="param" rows="15"></textarea> <br/>
+        <div>
+            <select id="method">
+                <option value="GET">GET</option>
+                <option value="POST">POST</option>
+            </select>
+            <input type="text" id="url" placeholder="please input url.." />
+        </div>
+        <div>
+            <label>With parameters:</label>
+        </div>
+        <div>
+            <textarea id="param" rows="15"></textarea>
+        </div>
+        <div>
         <input type="button" value="SEND" onclick="javascript:send_request();"/>
         <input type="button" value="Split URL" onclick="javascript:split_url();"/>
         <input type="button" value="Decode PARAM" onclick="javascript:decode_param();"/>
@@ -25,10 +31,9 @@
                title="Are your regretting? Click here to undo it."/>
         <input type="button" value="Redo" onclick="javascript:redo_it();"
                title="Are your regretting of having undone something? Click here to redo it."/>
-        <br/>
-        <div id="status"></div>
-        <div id="output" class="" style="display: none">
         </div>
+        <div id="status"></div>
+        <div id="output" class="" style="display: none"></div>
         <hr/>
         <h2>History:</h2>
         <div id="log"></div>
@@ -44,5 +49,10 @@
 <script type="text/javascript" src="index.js"></script>
 <script type="text/template" src="log-item.ejs" async="async"></script>
 <script type="text/template" src="ajax-status.ejs" async="async"></script>
+<script type="text/javascript">
+    if (/\.net/i.test(navigator.appVersion)){
+        window.alert('I bet you must be using IE. Arn\'t you? Chrome and firefox are recommended for you to get the best browsing experience.');
+    }
+</script>
 </body>
 </html>
