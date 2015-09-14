@@ -475,6 +475,11 @@ function MyDbStore(dbName, storeName){
     return this;
 }
 
+function escape_html(html){
+    var e = document.createElement('div');
+    e.innerText = html;
+    return e.innerHTML;
+}
 
 $(function(){
     $('h1,h2,h3,h4,h').initExpander(true);

@@ -94,7 +94,7 @@
     function JsonViewer(options) {
         var defaultOptions = {
             renderTo: null, // which element to render to
-            json: {},
+            json: {}
         };
         var self = this;
         self.options = $.extend(self, defaultOptions, options);

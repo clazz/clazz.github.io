@@ -10,24 +10,24 @@
     <div class="request">
         <h4>
             <span class="type" style="margin-right: 2em"><%= request.type %> </span>
-            <span class="url" style="font-weight: normal"><%= request.url %></span>
+            <span class="url" style="font-weight: normal"><%= escape_html(request.url) %></span>
         </h4>
         <h4>With PARAM:</h4>
-        <p class="param"><%= request.param %></p>
+        <p class="param"><%= escape_html(request.param) %></p>
         <h4>Pretty JSON:</h4>
-        <pre><code class="jsonPretty json"><%= request.jsonPretty %></code></pre>
+        <pre><code class="jsonPretty json"><%= escape_html(request.jsonPretty) %></code></pre>
     </div>
 
 
     <h3>Response<% if (response.elapsedTimeInSeconds){ %> <span class="time-elapsed">+<%= response.elapsedTimeInSeconds%>s</span> <% } %></h3>
     <div class="response">
         <h4>Pretty JSON</h4>
-        <pre><code class="jsonPretty json"><%= response.jsonPretty %></code></pre>
+        <pre><code class="jsonPretty json"><%= escape_html(response.jsonPretty) %></code></pre>
         <h4>JSON Decoded</h4>
-        <pre><code class="jsonNormal json"><%= response.json %></code></pre>
+        <pre><code class="jsonNormal json"><%= escape_html(response.json) %></code></pre>
         <h4>Base64 Decoded</h4>
-        <p class="base64"><%= response.base64 %></p>
+        <p class="base64"><%= escape_html(response.base64) %></p>
         <h4>Raw Response</h4>
-        <p class="raw"><%= response.raw %></p>
+        <p class="raw"><%= escape_html(response.raw) %></p>
     </div>
 </div>
