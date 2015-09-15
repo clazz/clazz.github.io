@@ -477,6 +477,7 @@ function MyDbStore(dbName, storeName){
 
 function escape_html(html){
     var e = document.createElement('div');
+    e.textContent = html;
     e.innerText = html;
     return e.innerHTML;
 }
