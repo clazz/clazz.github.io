@@ -1,0 +1,55 @@
+
+.wrapper{
+    position: relative;
+}
+.main{
+    width: 100%;
+    min-width: 50em;
+}
+
+.box{
+    box-sizing: border-box;
+    width: 50%;
+    float: left;
+    padding: 1em;
+    border-radius: 5px;
+}
+
+.box a{
+    display: block;
+    float: left;
+    padding-left: 0;
+    padding-right: 1em;
+}
+
+.box > pre, .box > textarea, .box > iframe{
+    display: block;
+    width: 100%;
+    min-height: 20em;
+    height: auto;
+}
+
+.update-indicator{
+    border-width: 1px;
+    border-style: solid;
+    border-color: #d3d3d3;
+}
+
+@keyframes update{
+    0% {border-color: #f00;}
+    100% {border-color: #a33;}
+}
+
+.dirty{
+    border-color: #ffefef;
+    animation: update 800ms;
+}
+
+.updated{
+    border-color: #d3d3d3;
+}
+
+
+.clearfix{
+    clear: both;
+}

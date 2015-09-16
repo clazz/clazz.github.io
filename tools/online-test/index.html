@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="index.css" />
+    <title>Onlin Test</title>
+</head>
+<body>
+<div class="wrapper">
+    <div class="main">
+        <div class="html box" id="html-box">
+            <a href="javascript:void(0)" draggable="false">HTML</a>
+            <pre id="html" autofocus="autofocus" tabindex="1"></pre>
+        </div>
+        <div class="result box" id="result-box">
+            <a href="javascript:void(0)" draggable="false">Result</a>
+            <a id="download" href="javascript:void(0)" download="test.html" >Download</a>
+            <a id="newWindow" href="javascript:void(0)" target="_blank" >New window</a>
+            <a id="refreshBtn" href="javascript:void(0)" draggable="false">Refresh</a>
+            <iframe id="result" class="update-indicator"></iframe>
+        </div>
+        <div class="css box" id="css-box">
+            <a href="javascript:void(0)" draggable="false">CSS</a>
+            <pre id="css" tabindex="2"></pre>
+        </div>
+        <div class="javascript box" id="javascript-box">
+            <a href="javascript:void(0)" draggable="false">Javascript</a>
+            <pre id="javascript" tabindex="3"></pre>
+        </div>
+    </div>
+    <div class="clearfix"></div>
+    <div id="error-report"></div>
+</div>
+</body>
+<script type="text/javascript" src="../../js/jquery.js"></script>
+<script type="text/javascript" src="../../ace/ace.js" charset="utf-8"></script>
+<script type="text/javascript" src="../../js/ejs/ejs_production.js"></script>
+<script type="text/javascript" src="../common/common.js"></script>
+<script type="text/javascript" src="index.js"></script>
+<script type="text/template" src="result.ejs"></script>
+<script type="text/javascript">
+    if (/\.net/i.test(navigator.appVersion)){
+        window.alert('I bet you must be using IE. Arn\'t you? Chrome and firefox are recommended for you to get the best browsing experience.');
+    }
+</script>
+</html>
