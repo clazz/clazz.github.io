@@ -16,12 +16,20 @@ $(function(){
     $html.on('input', refreshResultOnIdle);
     $refreshBtn.on('click', refreshResult);
 
+    loadSavedData(function(data){
+        $css.val(data.css);
+        $html.val(data.html);
+        $javascript.val(data.js);
+        refreshResult();
+    });
+
     function refreshResult(){
-        var resultHtml = resultTemplate.render({
+        var data = {
             javascript: $javascript.val(),
             css: $css.val(),
             html: $html.val()
-        });
+        };
+        var resultHtml = resultTemplate.render(data);
 
         var resultUrl = URL.createObjectURL(new Blob([resultHtml], {type:'text/html'}));
         $download[0].href = resultUrl;
@@ -29,6 +37,8 @@ $(function(){
         $result[0].contentWindow.location = resultUrl;
 
         $updateIndicator.removeClass('dirty').addClass('updated');
+
+        saveData(data);
     }
 
     function refreshResultOnIdle(){
@@ -66,6 +76,26 @@ $(function(){
                 }
             }
         };
+    }
+
+    function loadSavedData(callback){
+        if (localStorage[getSavedDataKey()]){
+            try{
+                var params = JSON.parse(localStorage[getSavedDataKey()]);
+                params && callback && callback(params);
+            }catch(e){
+                console.error(e.message);
+                console.error(e.stack);
+            }
+        }
+    }
+
+    function saveData(params){
+        localStorage[getSavedDataKey()] = JSON.stringify(params);
+    }
+
+    function getSavedDataKey(){
+        return 'onlineTestData_' + (location.hash || 'default');
     }
 
     function bindDragDrop(draggables, dropHolder){
