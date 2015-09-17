@@ -516,6 +516,7 @@ $(function(){
     $('#formatJsonBtn').on('click', format_json);
     $('#undoBtn').on('click', undo_it);
     $('#redoBtn').on('click', redo_it);
+    $('#noticeBtn').on('click', showNotice);
 
     if (!localStorage.hasShownNotice){
         showNotice().done(function(){
