@@ -1,69 +1,111 @@
-        dl.json-viewer{
-            vertical-align: top;
-            font-size: 14px;
-            line-height: 18px;
-        }
-        dl.json-viewer > dt {
-            font-size: smaller;
-            cursor: pointer;
-        }
-        dl.json-viewer > dt.array{
-            color: darkgoldenrod;
-        }
-        dl.json-viewer > dt.object{
-            color: darkcyan;
-        }
-        dl.json-viewer dd > var, dl.json-viewer dd > i{
-            font-style: normal;
-        }
-        dl.json-viewer dd > var{
-            color: royalblue;
-        }
-        dl.json-viewer dd > var.array{
-            color: steelblue;
-        }
-        dl.json-viewer dd > i{
-            margin-right: 8px;
-            color: darkgreen;
-        }
-        dl.json-viewer dd > samp > dl{
-            display: inline-block;
-            margin-top: 0;
-            margin-bottom: 0;
-        }
-        dl.json-viewer dd > samp > div{
-            display: inline-block;
-        }
-        dl.json-viewer dd > samp > dl > dd{
-            margin-left: 1px;
-        }
-        dl.json-viewer dd > samp.string{
-            color: blue;
-        }
+.json-viewer{
+    margin: 1em;
+    padding: 1em;
+    background-color: #ffffff;
+}
+.json-viewer .object > .object-begin,
+.json-viewer .array > .array-begin
+{
+    position: relative;
+    clear: both;
+    margin-left: 0;
+    cursor: pointer;
+}
+.json-viewer .object > .object-begin:hover,
+.json-viewer .array > .array-begin:hover,
+.json-viewer .object > .object-begin:hover .key,
+.json-viewer .array > .array-begin:hover .key
+{
+    color: #FF4500;
+    text-decoration: underline;
+}
+.json-viewer .object > .object-begin:before,
+.json-viewer .array > .array-begin:before{
+    display: inline-block;
+    content: ' ';
+    box-sizing: content-box;
+    width: 0;
+    height: 0;
+    border-width: 5px;
+    border-style: solid;
+    position: absolute;
+    top: 0.2em;
+    left: -1em;
 
+    border-color: transparent transparent transparent #000000;
+}
+.json-viewer .object > .object-begin.expanded:before,
+.json-viewer .array > .array-begin.expanded:before{
+    border-color: #000000 transparent transparent transparent;
+    top: 0.5em;
+}
 
+.json-viewer .object > .object-begin:hover:before,
+.json-viewer .array > .array-begin:hover:before{
+    border-color: transparent transparent transparent #FF4500;
+}
+.json-viewer .object > .object-begin.expanded:hover:before,
+.json-viewer .array > .array-begin.expanded:hover:before{
+    border-color: #FF4500 transparent transparent transparent;
+}
 
-        .icon{
-            display: inline-block;
-        }
-        .icon-expander{
-            display: inline-block;
-            border-width: 5px;
-            position: relative;
-            top: 5px;
-            border-style: solid;
-            border-color: #000000 transparent transparent transparent;
-            cursor: pointer;
-        }
-        .expanded .icon-expander{
-            display: inline-block;
-            position: relative;
-            top: -5px;
-            border-width: 5px;
-            border-style: solid;
-            border-color: transparent transparent #000000 transparent;
-        }
+.json-viewer .object > .object-end,
+.json-viewer .array > .array-end
+{
+    clear: both;
+    margin-left: 0;
+}
 
-        dl.json-viewer .icon-expander{
-            display: none;
-        }
+.json-viewer .object > .object-item,
+.json-viewer .array > .array-item{
+    clear: both;
+    margin-left: 2em;
+}
+
+.json-viewer .object:hover, .json-viewer .array:hover{
+    background-color: #fff;
+}
+
+.json-viewer .key{
+    color: #0000ff;
+}
+
+.json-viewer .string{
+    color: #008000;
+}
+
+.json-viewer .boolean{
+    color: #000099;
+}
+
+.json-viewer .number{
+    color: orangered;
+}
+
+.json-viewer .comment{
+    color: #6d6d6d;
+}
+
+.icon{
+    display: inline-block;
+}
+.icon-expander{
+    display: inline-block;
+    border-width: 5px;
+    position: relative;
+    border-style: solid;
+    cursor: pointer;
+
+    top: 0;
+    left: 3px;
+    border-color: transparent transparent transparent #000000;
+}
+.expanded .icon-expander{
+    top: 5px;
+    left: -2px;
+    border-color: #000000 transparent transparent transparent;
+}
+
+dl.json-viewer .icon-expander{
+    display: none;
+}

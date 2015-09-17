@@ -53,10 +53,11 @@ function includeJs(src){
 
 function includeCss(src){
     var link = document.createElement('link');
+    var head = document.getElementsByTagName('head')[0];
     link.setAttribute('rel','stylesheet');
     link.setAttribute('href',src);
     link.setAttribute('type','text/css');
-    document.body.appendChild(link);
+    head.appendChild(link);
     return link;
 }
 
