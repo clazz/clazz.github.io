@@ -516,5 +516,28 @@ $(function(){
     $('#formatJsonBtn').on('click', format_json);
     $('#undoBtn').on('click', undo_it);
     $('#redoBtn').on('click', redo_it);
+
+    if (!localStorage.hasShownNotice){
+        showNotice().done(function(){
+            localStorage.hasShownNotice = true;
+        });
+    }
 });
+
+function showNotice(){
+    var notice = new EJS({url: 'notice.ejs'});
+    var $dialog = $(notice.render({}));
+    var dfd = $.Deferred();
+
+    $dialog.on('click', '.btn-ok', function(){
+        $dialog.remove();
+        dfd.resolve('ok');
+        return false;
+    });
+
+    $dialog.appendTo('body').show();
+
+    return dfd.promise();
+}
+
 
