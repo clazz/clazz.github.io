@@ -39,50 +39,50 @@
      * @param defaultExpand bool initial expanded
      * @events expand, shrink, toggle-expand
      */
-    function initExpander(triggers, defaultExpand) {
+    function initExpander(triggers, defaultExpanded) {
         triggers.each(function (i, e) {
-            var tagName = e.tagName;
-            if (!tagName.match(/^(dt|h\d*)/i)) {
-                console.error("Unsupported tag: %o of %o!", tagName, e);
-                return;
-            }
-            e = $(e);
-            var target = e.data('expander-target');
-            if (!target) {
-                target = e.nextUntil(tagName);
-                e.data('expander-target', target);
+            var $trigger = $(e);
+            if ($trigger.children('.icon-expander').size() == 0) {
+                $trigger.prepend('<i class="icon icon-expander"></i>');
             }
 
-            if (target.size() <= 0){
-                return;
-            }
+            $trigger.on('expand', function () {
+                var $this = $(this);
+                findTarget($this).show();
+                $this.addClass('expanded');
+            });
 
-            var trigger = e;
-            if (trigger.children('.icon-expander').size() == 0) {
-                trigger.prepend('<i class="icon icon-expander"></i>');
-            }
-            trigger.on('expand', function () {
-                target.show();
-                trigger.addClass('expanded');
+            $trigger.on('shrink', function () {
+                var $this = $(this);
+                findTarget($this).hide();
+                $this.removeClass('expanded');
             });
-            trigger.on('shrink', function () {
-                target.hide();
-                trigger.removeClass('expanded');
+
+            $trigger.on('toggle-expand', function () {
+                var $this = $(this);
+                $this.trigger(findTarget($this).is(':visible') ? 'shrink' : 'expand');
             });
-            trigger.on('toggle-expand', function () {
-                trigger.trigger(target.is(':visible') ? 'shrink' : 'expand');
+
+            $trigger.on('click', function () {
+                $(this).trigger('toggle-expand');
             });
-            trigger.on('click', function () {
-                trigger.trigger('toggle-expand');
-            });
-            trigger.css({cursor: 'pointer'});
+
+            $trigger.css({cursor: 'pointer'});
         });
 
-        if (!defaultExpand) {
+        if (!defaultExpanded) {
             triggers.trigger('shrink');
-            $(triggers.toArray().slice(0, 3)).trigger('expand');
         } else {
             triggers.trigger('expand');
+        }
+
+        function findTarget($trigger){
+            var tagName = $trigger[0].tagName;
+            if (!tagName || !tagName.match(/^(dt|h\d*)/i)) {
+                console.error("Unsupported tag: %o of %o!", tagName, e);
+                return $('<div></div>');
+            }
+            return $trigger.nextUntil(tagName);
         }
     }
 

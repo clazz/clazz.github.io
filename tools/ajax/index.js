@@ -255,8 +255,7 @@ function on_got_output(response, request){
         elapsedTimeInSeconds: response.elapsedTimeInSeconds
     }, request);
 
-    var $output = $('#output').html($('#log .log-item:first .response').html()).show();
-    initExpanderForLogItem($output);
+    $('#output').empty().append($('#log .log-item:first .response').clone(true, true)).show();
 }
 
 /**
@@ -296,19 +295,11 @@ function render_and_prepend_log(data, opt) {
     });
 
     $logItem.prependTo('#log');
-    initExpanderForLogItem($logItem);
+    $logItem.find('h3,h4').initExpander(true);
+    $logItem.find('.response h4:not(:eq(1))').trigger('shrink');
 
     if (opt && opt.jump){
         location.hash = '#' + uiLogItemId;
-    }
-}
-
-function initExpanderForLogItem($logItem){
-    $logItem.find('h3,h4').initExpander(true);
-    if ($logItem.find('.response').size() > 0){
-        $logItem.find('.response h4:not(:eq(1))').trigger('shrink');
-    } else {
-        $logItem.find('h4:not(:eq(1))').trigger('shrink');
     }
 }
 
