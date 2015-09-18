@@ -283,7 +283,11 @@ function render_and_prepend_log(data, opt) {
     $logItem.find('.refillBtn').on('click', function(){
         $('#method').val(data.request.type);
         $('#url').val(data.request.url);
-        set_param(data.request.jsonPretty);
+        if (data.request.jsonPretty && !/^null|undefined$/.test(data.request.jsonPretty)){
+            set_param(data.request.jsonPretty);
+        } else {
+            set_param(data.request.param);
+        }
         window.location.hash = '#url';
         try{ $('#url')[0].scrollIntoView(); }catch(e){}
         return false;
