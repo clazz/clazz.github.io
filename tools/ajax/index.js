@@ -187,7 +187,7 @@ function do_ajax(opt, done){
 
     xhr.onreadystatechange = function(){
         report_status();
-        if (4 == xhr.readyState && 200 == xhr.status){
+        if (4 == xhr.readyState){
             clearInterval(do_ajax.timerId);
             done && done.call && done(xhr.responseText, +(new Date() - startTime) / 1000);
         }
@@ -217,40 +217,68 @@ function humanize_xhr_ready_state(readyState){
     }
 }
 
-function on_got_output(response, request){
-    var base64 = null, json = null, jsonPretty = null;
-    console.log("Raw output:: %o", {output: response.text});
-    try{
-        base64 = Base64.decode(response.text);
-        console.log("Base64 decoded: %o", {base64: base64});
-        try{
-            json = parseJson(base64);
-            console.log("JSON: %o", {json: json});
-            jsonPretty = JSON.stringify(json, null, ' ');
-        }catch(e){
-            console.log("Failed to decode json: %o", e);
-            console.log(e.stack);
-        }
-
-        if (!json){
-            try{
-                json = parseJson(response.text);
-                console.log("JSON: %o", {json: json});
-                jsonPretty = JSON.stringify(json, null, ' ');
-            }catch(e){
-                console.log("Failed to decode json: %o", e);
-                console.log(e.stack);
-            }
-        }
-    }catch(e){
+function try_decode_base64(data){
+    if (!data){
+        return null;
+    }
+    try {
+        return Base64.decode(data);
+    } catch (e){
         console.log("Failed to decode base64: %o", e);
         console.log(e.stack);
+        return null;
+    }
+}
+
+function try_decode_json(data){
+    if (!data){
+        return null;
     }
 
+    try{
+        return parseJson(data);
+        console.log("JSON: %o", {json: json});
+    }catch(e){
+        console.log("Failed to decode json: %o", e);
+        console.log(e.stack);
+        return null;
+    }
+}
+
+function parse_response(response){
+    var base64 = null, json = null;
+
+    json = try_decode_json(base64 = try_decode_base64(response));
+    if (!json){
+        json = try_decode_json(response);
+        if (json && typeof json === 'string'){
+            var json_2, base64_2;
+            json_2 = try_decode_json(base64_2 = try_decode_base64(json));
+            if (json_2){
+                json = json_2;
+                base64 = base64_2;
+            } else {
+                json_2 = try_decode_json(json);
+                if (json_2){
+                    json = json_2;
+                }
+            }
+        }
+    }
+
+    return {base64: base64, json:json};
+}
+
+function on_got_output(response, request){
+    var parsed;
+
+    console.log("Raw output:: %o", {output: response.text});
+    parsed = parse_response(response.text) || {};
+
     log_it({
-        base64: base64,
-        json: json,
-        jsonPretty: jsonPretty,
+        base64: parsed.base64,
+        json: parsed.json,
+        jsonPretty: JSON.stringify(parsed.json, null, '  '),
         raw: response.text,
         elapsedTimeInSeconds: response.elapsedTimeInSeconds
     }, request);
