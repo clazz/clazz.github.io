@@ -1,0 +1,10 @@
+<div class="response-wrapper">
+    <h3>
+        Response
+        <span class="status status-<%= status %>"><%= status + ' ' + statusText %></span>
+        <% if (elapsedTimeInSeconds){ %>
+            <span class="time-elapsed">+<%= elapsedTimeInSeconds%>s</span>
+        <% } %>
+    </h3>
+    <div class="response"></div>
+</div>

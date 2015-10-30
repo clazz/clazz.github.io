@@ -9,20 +9,22 @@
 <div class="content">
     <div class="main center">
         <div>
-            <select id="method">
+            <select id="method" tabindex="1">
                 <option value="GET">GET</option>
                 <option value="POST">POST</option>
                 <option value="PUT">PUT</option>
                 <option value="DELETE">DELETE</option>
             </select>
-            <input type="text" id="url" placeholder="please input url.." />
+            <input type="text" id="url" tabindex="2" placeholder="please input url.." />
+        </div>
+
+        <div>
+            <label for="param">With parameters:</label>
         </div>
         <div>
-            <label>With parameters:</label>
+            <pre id="param" tabindex="3" ></pre>
         </div>
-        <div>
-            <textarea id="param" rows="15"></textarea>
-        </div>
+
         <div>
             <input type="button" value="SEND" id="sendBtn" />
             <input type="button" value="Split URL" id="splitUrlBtn" />
@@ -33,14 +35,20 @@
                    title="Are your regretting? Click here to undo it."/>
             <input type="button" value="Redo" id="redoBtn"
                    title="Are your regretting of having undone something? Click here to redo it."/>
-            <input type="button" value="?!" id="noticeBtn"
-                   title="See notice about cross site requests."/>
+            <a id="toggleExpand" class="to-expand" title="Expand/Shrink" href="#" >v</a>
         </div>
+
         <div id="status"></div>
-        <div id="output" class="" style="display: none"></div>
+
+        <div id="response" style="display: none"></div>
+
         <hr/>
-        <h2>History:</h2>
-        <div id="log"></div>
+
+        <div class="history-wrapper">
+            <h2 id="historyTitle">History:</h2>
+            <ul id="historyContent"></ul>
+            <div id="historyDetail"></div>
+        </div>
     </div>
 </div>
 <script type="text/javascript" src="../../js/jquery.js"></script>
@@ -48,16 +56,14 @@
 <script type="text/javascript" src="../../js/json-viewer.js"></script>
 <script type="text/javascript" src="../../js/json-formater.js"></script>
 <script type="text/javascript" src="../../js/base64.js"></script>
+<script type="text/javascript" src="../../ace/ace.js" charset="utf-8"></script>
 <script type="text/javascript" src="../../js/ejs/ejs_production.js"></script>
 <script type="text/javascript" src="../common/common.js"></script>
 <script type="text/javascript" src="index.js"></script>
-<script type="text/template" src="log-item.ejs" async="async"></script>
+<script type="text/template" src="object.ejs" async="async"></script>
 <script type="text/template" src="ajax-status.ejs" async="async"></script>
-<script type="text/template" src="notice.ejs" async="async"></script>
-<script type="text/javascript">
-    if (/\.net/i.test(navigator.appVersion)){
-        window.alert('I bet you must be using IE. Arn\'t you? Chrome and firefox are recommended for you to get the best browsing experience.');
-    }
-</script>
+<script type="text/template" src="ajax-response.ejs" async="async"></script>
+<script type="text/template" src="ajax-history-item.ejs" async="async"></script>
+<script type="text/template" src="ajax-history-content-item.ejs" async="async"></script>
 </body>
 </html>

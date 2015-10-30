@@ -1,0 +1,27 @@
+<div class="ajax-history-item" id="<%= id %>">
+    <h2 class="title">
+        <span class="id"><%= id %></span>
+        <span class="type" ><%= request.type %> </span>
+        <span class="url"><%= escape_html(request.url) %></span>
+    </h2>
+    <div class="toolbar">
+        <button type="button" class="closeBtn" title="Close this item" >X</button>
+        <button type="button" class="delBtn" >RM</button>
+        <button type="button" class="resendBtn" >RESEND</button>
+        <button type="button" class="refillBtn" >REFILL</button>
+    </div>
+
+    <div class="request-wrapper">
+        <h3> Request </h3>
+        <div class="request">
+            <h4>
+                <span class="type" ><%= request.type %> </span>
+                <span class="url" style="font-weight: normal"><%= escape_html(request.url) %></span>
+            </h4>
+            <h4>With Param:</h4>
+            <div class="param-obj"></div>
+        </div>
+    </div>
+
+    <div class="response"></div>
+</div>

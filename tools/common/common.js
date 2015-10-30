@@ -15,7 +15,7 @@ if (!window.$){
 }
 
 $(function(){
-    includeCss(ToolsBasePath + '/common/common.css');
+    includeCss(ToolsBasePath + '/common/common.css', {append: false});
     includeHtml(ToolsBasePath + '/common/layout.html').done(function(html){
         var $body = $('body');
         var $layout = $(html);
@@ -51,13 +51,27 @@ function includeJs(src){
     return script;
 }
 
-function includeCss(src){
+function includeCss(src, opt){
+    opt = $.extend({}, {append: true}, opt);
+
     var link = document.createElement('link');
     var head = document.getElementsByTagName('head')[0];
+
     link.setAttribute('rel','stylesheet');
     link.setAttribute('href',src);
     link.setAttribute('type','text/css');
-    head.appendChild(link);
+
+    if (opt.append){
+        head.appendChild(link);
+    } else {
+        if (head.insertAdjacentElement){
+            head.insertAdjacentElement('afterBegin',link);
+        } else if (head.prependChild){
+            head.prependChild(link);
+        } else {
+            console.error("Error: cannot include css using prepend!");
+        }
+    }
     return link;
 }
 
@@ -105,7 +119,7 @@ function getCurrentScriptPath(){
 (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
     (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
 m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 ga('create', 'UA-67468647-1', 'auto');
 ga('send', 'pageview');
 

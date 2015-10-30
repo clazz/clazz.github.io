@@ -1,0 +1,12 @@
+<div class="object-wrapper">
+    <ul>
+        <li  data-target="object"><a href="#">Object</a></li>
+        <li  data-target="json-pretty"><a href="#">JSON</a></li>
+        <li  data-target="base64-decoded"><a href="#">Base64 Decoded</a></li>
+        <li  data-target="raw"><a href="#">Raw</a></li>
+    </ul>
+    <div class="format object"></div>
+    <div class="format json-pretty"><pre><%= escape_html(jsonPretty) %></pre></div>
+    <div class="format base64-decoded"><%= escape_html(base64Decoded) %></div>
+    <div class="format raw"><%= escape_html(raw) %></div>
+</div>

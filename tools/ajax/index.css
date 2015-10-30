@@ -1,3 +1,11 @@
+html{
+    font-size: 10px;
+}
+
+body{
+    background-color: #C7C7C7;
+}
+
 h1{
     margin: 0;
     font-size: 160%;
@@ -15,39 +23,47 @@ h4{
     font-size: 100%;
 }
 
-.output{
-    border-top: gray solid 1px;
-    /*overflow: auto;*/
-    /*max-width: 95vw;*/
-    /*max-height: 80vh;*/
+#param{
+    display: block;
+    width: 100%;
+    height: auto;
+    min-height: 20em;
+    max-height: 100vh;
 }
+
+#toggleExpand, #toggleExpand:hover, #toggleExpand:visited{
+    display: block;
+    float: right;
+    position: relative;
+
+    width: 0;
+    height: 0;
+
+    margin: 0;
+    padding: 0;
+
+    color: transparent;
+    overflow: hidden;
+
+
+    border-width: 0.5rem 0.7rem;
+    border-style: solid;
+    border-color: transparent;
+}
+
+#toggleExpand.to-expand, #toggleExpand.to-expand:hover, #toggleExpand.to-expand:visited{
+    border-color: #333 #C7C7C7 #C7C7C7 #C7C7C7;
+    top: -0.5rem;
+}
+#toggleExpand.to-shrink, #toggleExpand.to-shrink:hover, #toggleExpand.to-shrink:visited{
+    border-color: #C7C7C7 #C7C7C7 #333 #C7C7C7;
+    top: -1rem;
+}
+
 .raw{
     word-wrap: break-word;
 }
 
-.json{
-    white-space: pre;
-}
-.log-item{
-    margin: 0.5em;
-    padding: 0.5em;
-    border: whitesmoke 1px solid;
-}
-#log-item-template-wrapper{
-    display: none;
-}
-.log-item button{
-    float: right;
-    cursor: pointer;
-}
-.log-item button:hover{
-    color: #ff8000;
-}
-.param{
-    max-width: 90vw;
-    word-wrap: break-word;
-    white-space: normal;
-}
 .notice-wrapper{
     position: absolute;
     left: 0;
@@ -79,9 +95,7 @@ h4{
     cursor: pointer;
     background: transparent;
 }
-.request, .response{
-    padding-left: 2em;
-}
+
 #status{
     position: fixed;
     left: 0;
@@ -109,10 +123,6 @@ h4{
     min-width: 500px;
     position: relative;
 }
-#param{
-    display: block;
-    width: 100%;
-}
 #method{
     display: block;
     width: 5em;
@@ -128,4 +138,139 @@ h4{
     padding-left: 5em;
     position: relative;
     z-index: 1;
+}
+
+.object-wrapper ul{
+    list-style: none;
+
+    display: block;
+    position: relative;
+
+    height: 1.5em;
+    line-height: 1.5em;
+
+    margin: 0;
+    padding: 0;
+    border-bottom: 1px solid #333;
+}
+
+.object-wrapper ul li{
+    display: block;
+    float: left;
+}
+.object-wrapper ul li a{
+    display: inline-block;
+    padding-left: 2em;
+    padding-right: 2em;
+}
+
+.object-wrapper li.active,
+.object-wrapper li.active a,
+.object-wrapper li.active a:visited,
+.object-wrapper li.active a:hover{
+    color: white;
+    background-color: black;
+}
+
+.object-wrapper .format{
+    display: none;
+    width: 100%;
+    height: auto;
+    max-height: 100vh;
+    overflow-y: scroll;
+    background-color: #fff;
+}
+.object-wrapper .format.active{
+    display: block;
+}
+
+#historyTitle, #historyContent, #historyDetail{
+    background-color: #ededed
+}
+
+#historyContent{
+    list-style: none;
+    margin: 0 auto;
+}
+
+#historyContent li.active a,
+#historyContent li.active a:visited,
+#historyContent li.active a:hover{
+    color: white;
+    background-color: black;
+}
+#historyContent li a{
+    display: inline-block;
+    width: 100%;
+}
+#historyContent li a span{
+    display: inline-block;
+    max-width: 80%;
+    text-overflow: ellipsis;
+    overflow-x: hidden;
+    white-space: pre;
+}
+#historyContent li a span.id{
+    width: 2em;
+    text-align: right;
+}
+
+.ajax-history-item{
+    display: block;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0.3rem;
+    background-color: #ededed
+}
+.ajax-history-item .title{
+    display: block;
+}
+.ajax-history-item .title .id:before{
+    content: '#';
+}
+.ajax-history-item .title .url{
+    display: inline-block;
+    position: relative;
+
+    font-size: 2rem;
+    font-weight: normal;
+
+    top: 0.5rem;
+
+    max-width: 80%;
+    white-space: pre;
+    text-overflow: ellipsis;
+    overflow-x: hidden;
+}
+
+.ajax-history-item h4{
+    margin-left: 2.5rem;
+}
+
+.ajax-history-item .toolbar, .ajax-history-item .toolbar button{
+    float: right;
+}
+.ajax-history-item .toolbar .closeBtn{
+    position: relative;
+    z-index: 10;
+    top: -2rem;
+}
+.ajax-history-item h3{
+    margin-left: 1rem;
+}
+
+
+.response .status{
+    font-weight: bold;
+    font-size: 1.3rem;
+}
+
+.response .status-200{
+    color: #008000;
+}
+
+.response .status-500{
+    color: #ff0000;
 }

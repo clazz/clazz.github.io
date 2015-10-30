@@ -79,7 +79,7 @@
         function findTarget($trigger){
             var tagName = $trigger[0].tagName;
             if (!tagName || !tagName.match(/^(dt|h\d*)/i)) {
-                console.error("Unsupported tag: %o of %o!", tagName, e);
+                console.error("Unsupported tag: %o of %o!", tagName, new Error(tagName));
                 return $('<div></div>');
             }
             return $trigger.nextUntil(tagName);
