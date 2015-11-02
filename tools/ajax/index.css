@@ -192,7 +192,10 @@ h4{
     list-style: none;
     margin: 0 auto;
 }
-
+#historyContent li{
+    position: relative;
+    padding-left: 2em;
+}
 #historyContent li.active a,
 #historyContent li.active a:visited,
 #historyContent li.active a:hover{
@@ -213,6 +216,19 @@ h4{
 #historyContent li a span.id{
     width: 2em;
     text-align: right;
+}
+#historyContent li .btn-remove{
+    display: none;
+}
+#historyContent li:hover .btn-remove{
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+
+    font-size: 0.5rem;
+    color: #ff0000;
+    cursor: pointer;
 }
 
 .ajax-history-item{

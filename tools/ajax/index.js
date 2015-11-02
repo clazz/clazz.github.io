@@ -137,7 +137,7 @@ var AjaxPageController = defClass({
             try {
                 this.updateParam(Utils.formatJson(Utils.parseJson(param, {throws: true})));
             } catch (e){
-                Utils.notice(e.message, {clearPrevious: true});
+                Utils.notice(e.message);
             }
         },
         /**
@@ -256,6 +256,22 @@ var AjaxHistoryController = defClass({
                 return false;
             });
 
+            // delete from content
+            self.ui.$content.on('click', '.btn-remove', function(){
+                var $contentItem = $(this).closest('li');
+                var id = $contentItem.data('target');
+
+                self.db.deleteById(id).done(function(){
+                    console.log("#" + id + " removed.");
+                    $contentItem.remove();
+                    $('#' + id).remove();
+                }).fail(function(reason, detail){
+                    console.log("#" + id + " removal failed: %s:%o", reason, detail);
+                    Utils.notice("#" + id + " removal failed:" + reason);
+                });
+
+                return false;
+            });
             // close
             self.ui.$detail.on('click', '.closeBtn', function(){
                 $(this).closest('.ajax-history-item').remove();
@@ -594,8 +610,24 @@ var AjaxRequest = defClass({
                     }
                 };
 
-                xhr.open(type, url, true);
-                xhr.send(data);
+                xhr.onerror = function(){
+                    console.error("OnError: %o", arguments);
+                    console.error(JSON.stringify(arguments, null, ' '));
+                    Utils.notice('Ajax请求失败，可能是由于以下情况：\n' +
+                                '    1. 网络故障；\n' +
+                                '    2. 服务器未返回应答；\n' +
+                                '    3. 服务器不支持跨域请求。\n' +
+                                '详细错误信息如下：\n'+
+                                JSON.stringify(arguments, null, ' '));
+                };
+
+                try {
+                    xhr.open(type, url, true);
+                    xhr.send(data);
+                } catch (e){
+                    console.error(e.message);
+                    console.error(e.stack);
+                }
 
                 function notifyProgress(){
                     dfd.notify({
@@ -1273,23 +1305,10 @@ function clone(obj){
     return $.extend({}, obj || {});
 }
 
-
-//=================== run =====================
-var page = new AjaxPageController().init();
-
-//==================== web ====================
-$(function(){
-    if (!localStorage.hasShownNotice){
-        showNotice().done(function(){
-            localStorage.hasShownNotice = true;
-        });
-    }
-    
-    if (/\.net/i.test(navigator.appVersion)){
-        window.alert('I bet you must be using IE. Arn\'t you? Chrome and firefox are recommended for you to get the best browsing experience.');
-    }
-});
-
+/**
+ * Notice
+ * @returns {*}
+ */
 function showNotice(){
     var notice = new EJS({url: 'notice.ejs'});
     var $dialog = $(notice.render({}));
@@ -1307,3 +1326,18 @@ function showNotice(){
 }
 
 
+//=================== run =====================
+var page = new AjaxPageController().init();
+
+//==================== web ====================
+$(function(){
+    if (!localStorage.hasShownNotice){
+        showNotice().done(function(){
+            localStorage.hasShownNotice = true;
+        });
+    }
+    
+    if (/\.net/i.test(navigator.appVersion)){
+        window.alert('I bet you must be using IE. Arn\'t you? Chrome and firefox are recommended for you to get the best browsing experience.');
+    }
+});
