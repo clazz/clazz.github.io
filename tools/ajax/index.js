@@ -201,7 +201,10 @@ var AjaxHistoryController = defClass({
         init: function(){
             this.ui = {
                 $content: $('#historyContent'),
-                $detail: $('#historyDetail')
+                $detail: $('#historyDetail'),
+                $import: $('#importHistory'),
+                $export: $('#exportHistory'),
+                $download: $('#downloadHistory')
             };
             this.db = new IdBasedDbStore('log');
             this.bindEvents();
@@ -272,6 +275,7 @@ var AjaxHistoryController = defClass({
 
                 return false;
             });
+
             // close
             self.ui.$detail.on('click', '.closeBtn', function(){
                 $(this).closest('.ajax-history-item').remove();
@@ -298,6 +302,95 @@ var AjaxHistoryController = defClass({
                 });
 
                 return false;
+            });
+
+            // export:
+            self.ui.$export.on('click', function(){
+                self.actionExportJson();
+                return false;
+            });
+
+            // import:
+            self.ui.$import.on('click', function(){
+                var $file = $('<input type="file" style="visibility: hidden;display: inline-block; height: 1px; width: 1px;" />');
+                $file.appendTo('body');
+                $file.on('change', function(){
+                    console.log($file[0].files);
+                    var file = $file[0].files[0];
+                    var fileReader = new FileReader();
+                    fileReader.onloadend = function(){
+                        var historyItemList = Utils.jsonDecode(this.result);
+                        if (!historyItemList){
+                            Utils.notice("The imported file's format is incorrect!");
+                            return;
+                        }
+
+                        var i = 0;
+                        var len = historyItemList.length;
+                        var successCount = 0;
+                        var failCount = 0;
+
+                        var importNext = function(){
+                            console.log('import ' + i + '/' + len);
+                            if (i >= len){
+                                Utils.notice("Imported " + len + " item(s). " + successCount + ' succeeded. ' + failCount + ' failed.');
+                                return;
+                            }
+
+                            var item = historyItemList[i];
+
+                            if (item.request && item.response){
+                                self.add({
+                                    request: AjaxRequest.unserialize(item.request),
+                                    response: AjaxResponse.unserialize(item.response)
+                                }).done(function(){
+                                    successCount++;
+                                    importNext();
+                                }).fail(function(reason){
+                                    failCount++;
+                                    Utils.notice('#' + i + ' import failed: ' + reason);
+                                    importNext();
+                                });
+                            } else {
+                                Utils.notice("#" + i + " is invalid! Ignored.");
+                            }
+
+                            i++;
+                        };
+
+                        importNext();
+                    };
+                    fileReader.readAsText(file);
+                });
+                $file.trigger('click');
+            });
+        },
+        actionExportJson: function(){
+            var self = this;
+            var data = [];
+
+            self.ui.$download.hide();
+
+            self.db.each(function(historyItemData){
+                historyItemData = historyItemData || {};
+                historyItemData.request = historyItemData.request || {};
+                historyItemData.response = historyItemData.response || {};
+                data.push({
+                    id: historyItemData.id,
+                    request: {
+                        type: historyItemData.request.type,
+                        url: historyItemData.request.url,
+                        param: historyItemData.request.param,
+                    },
+                    response: {
+                        raw: historyItemData.response.raw,
+                        elapsedTimeInSeconds: historyItemData.response.elapsedTimeInSeconds
+                    }
+                });
+            }).done(function(){
+                var blob = new Blob([JSON.stringify(data)]);
+                var url = window.URL.createObjectURL(blob);
+                self.ui.$download.attr('href', url).show();
             });
         },
         /**
@@ -996,7 +1089,7 @@ var Utils = {
      * @param msg
      * @param opt
      */
-    notice: function(msg, opt){
+    notice: function (msg, opt){
         opt = $.extend({}, { clearPrevious: true  }, opt);
 
         if (opt.clearPrevious){
@@ -1009,6 +1102,8 @@ var Utils = {
             notice.remove();
             return false;
         });
+
+        window.scrollTo(0, 0);
     },
     /**
      * 将xhr的readyState转换为人类可读的文字
