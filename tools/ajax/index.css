@@ -211,8 +211,8 @@ h4{
 
 #historyContent{
     list-style: none;
-    margin: 0 auto;
-
+    margin: 0;
+    padding: 0;
 }
 #historyContent li{
     position: relative;
@@ -236,7 +236,7 @@ h4{
     white-space: pre;
 }
 #historyContent li a span.id{
-    width: 2em;
+    width: 3em;
     text-align: right;
 }
 #historyContent li .btn-remove{

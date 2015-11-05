@@ -1432,7 +1432,9 @@ $(function(){
         });
     }
     
-    if (/\.net/i.test(navigator.appVersion)){
-        window.alert('I bet you must be using IE. Arn\'t you? Chrome and firefox are recommended for you to get the best browsing experience.');
+    if (!/Chrome/i.test(navigator.appVersion)){
+        window.alert('I bet you must be using IE or Firefox. Aren\'t you?\n'
+                    + 'Chrome are recommended for you to get the best browsing experience.\n'
+                    + 'Or you can join us to migrate it to Firefox or IE: https://github.com/clazz \n');
     }
 });
