@@ -1426,11 +1426,7 @@ var page = new AjaxPageController().init();
 
 //==================== web ====================
 $(function(){
-    if (!localStorage.hasShownNotice){
-        showNotice().done(function(){
-            localStorage.hasShownNotice = true;
-        });
-    }
+    showNotice();
     
     if (!/Chrome/i.test(navigator.appVersion)){
         window.alert('I bet you must be using IE or Firefox. Aren\'t you?\n'
