@@ -333,6 +333,7 @@ var Nibbler = function (options) {
     };
     this.encode = encode;
     this.decode = decode;
+    this.keyString = options.keyString + options.pad;
     construct();
 };
 
