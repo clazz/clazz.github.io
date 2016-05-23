@@ -11,10 +11,14 @@
 <div id="ta">
     <h3>Base64解密</h3>
     <div>
-        <input type="button" value="Base64解密" onclick="decode64_up_to(window.times.value)"/>
-        <input type="button" value="Base64加密" onclick="encode64_up_to(window.times.value)"/>
+        <input type="button" value="Base64解密" onclick="decode64_up_to(window.decodeTimes.value)"/>
         <label>
-            <input type="number" value="1" id="times" />次
+            <input type="number" value="100" id="decodeTimes" style="width: 3em" />次
+        </label>
+        <span style="width: 2em">&nbsp;</span>
+        <input type="button" value="Base64加密" onclick="encode64_up_to(window.encodeTimes.value)"/>
+        <label>
+            <input type="number" value="10" id="encodeTimes" style="width: 3em" />次
         </label>
     </div>
     <div id="err"></div>
