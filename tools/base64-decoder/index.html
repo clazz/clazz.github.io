@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Base64解密</title>
+    <link type="text/css" rel="stylesheet" href="../../styles/shCoreDefault.css">
+    <link type="text/css" rel="stylesheet" href="../../css/json-viewer.css">
+    <link type="text/css" rel="stylesheet" href="index.css">
+</head>
+<body>
+<div id="ta">
+    <h3>Base64解密</h3>
+    <div>
+        <input type="button" value="Base64解密" onclick="decode64_up_to(window.times.value)"/>
+        <input type="button" value="Base64加密" onclick="encode64_up_to(window.times.value)"/>
+        <label>
+            <input type="number" value="1" id="times" />次
+        </label>
+    </div>
+    <div id="err"></div>
+</div>
+<textarea id="text" placeholder="Input whatever"></textarea>
+<script type='text/javascript' src='../../js/jquery.js'></script>
+<script type="text/javascript" src="../../scripts/shCore.js"></script>
+<script type="text/javascript" src="../../scripts/shBrushJScript.js"></script>
+<script type="text/javascript" src="../../js/json-viewer.js"></script>
+<script type="text/javascript" src="../common/common.js"></script>
+<script type="text/javascript" src="index.js"></script>
+</body>
+</html>
